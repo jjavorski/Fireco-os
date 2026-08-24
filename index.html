@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#111111">
+<title>Fireco OS — FDR-001</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f3f3;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+header{background:#111;color:#fff;padding:22px 18px 18px;position:sticky;top:0;z-index:5}
+.brand{font-size:24px;font-weight:800;letter-spacing:.5px}.tag{font-size:11px;letter-spacing:1px;margin-top:3px;opacity:.8}
+.card{background:#fff;margin:14px;border-radius:14px;padding:16px;box-shadow:0 2px 10px #00000012}
+h2{font-size:16px;margin:0 0 12px}.sub{font-size:12px;color:#666;margin:-6px 0 12px}
+label{display:block;font-size:12px;font-weight:700;margin:12px 0 6px}
+input,select,textarea{width:100%;font-size:16px;border:1px solid #c9c9c9;border-radius:10px;padding:12px;background:#fff}
+textarea{min-height:105px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.crew{border:1px solid #ddd;border-radius:10px;padding:10px;margin:8px 0}
+.crewgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:7px}.crewgrid input{padding:10px}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}.check{border:1px solid #ddd;border-radius:10px;padding:11px;font-size:14px}
+.check input{width:auto;margin-right:7px}
+.photo{border:2px dashed #bbb;border-radius:12px;padding:18px;text-align:center}
+button{width:100%;border:0;border-radius:12px;padding:15px;font-size:17px;font-weight:800}
+.primary{background:#111;color:#fff}.secondary{background:#e8e8e8;color:#111;margin-top:9px}
+.status{display:none;padding:12px;border-radius:10px;background:#e7f6e9;margin-top:10px;font-weight:700}
+footer{text-align:center;padding:12px 20px 30px;color:#777;font-size:11px}
+@media(min-width:700px){body{max-width:720px;margin:auto}.card{margin-left:0;margin-right:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">FIRECO, INC.</div>
+  <div class="tag">WE TAKE LIFE SAFETY SERIOUSLY</div>
+  <div style="margin-top:14px;font-size:14px;font-weight:700">FDR-001 • DAILY FIELD REPORT</div>
+</header>
+
+<form id="report">
+<section class="card">
+<h2>1. Project</h2>
+<div class="row">
+<div><label>Project</label><input id="project" name="project" placeholder="Project name"></div>
+<div><label>Project #</label><input id="projectNo" name="projectNo" placeholder="Project #"></div>
+</div>
+<div class="row">
+<div><label>Date</label><input id="date" name="date" type="date"></div>
+<div><label>Foreman</label><input name="foreman" placeholder="Foreman"></div>
+</div>
+</section>
+
+<section class="card">
+<h2>2. Crew & Hours</h2>
+<div class="sub">Add only the people who worked today.</div>
+<div id="crew"></div>
+<button type="button" class="secondary" onclick="addCrew()">+ Add Crew Member</button>
+</section>
+
+<section class="card">
+<h2>3. Today's Work</h2>
+<label>Where did you work?</label>
+<input name="locations" placeholder="Building / floor / room / area">
+<label>What did you accomplish?</label>
+<textarea name="work" placeholder="Briefly describe today's work..."></textarea>
+<label>Materials installed / used</label>
+<textarea name="materials" placeholder="Materials and quantities, if useful..."></textarea>
+</section>
+
+<section class="card">
+<h2>4. Production</h2>
+<div class="row">
+<div><label>Quantity completed</label><input name="quantity" inputmode="decimal" placeholder="0"></div>
+<div><label>Unit</label><select name="unit"><option>EA</option><option>LF</option><option>SF</option><option>Penetrations</option><option>Other</option></select></div>
+</div>
+</section>
+
+<section class="card">
+<h2>5. Issues / Delays</h2>
+<div class="checks">
+<label class="check"><input type="checkbox" name="issue" value="None">No issues</label>
+<label class="check"><input type="checkbox" name="issue" value="Access">Access</label>
+<label class="check"><input type="checkbox" name="issue" value="Other trades">Other trades</label>
+<label class="check"><input type="checkbox" name="issue" value="Material">Material</label>
+<label class="check"><input type="checkbox" name="issue" value="Design / RFI">Design / RFI</label>
+<label class="check"><input type="checkbox" name="issue" value="Customer direction">Customer direction</label>
+</div>
+<label>Explain if necessary</label>
+<textarea name="issues" placeholder="Only if something affected the work..."></textarea>
+</section>
+
+<section class="card">
+<h2>6. Photos</h2>
+<div class="photo">
+  <strong>Add job photos</strong><br>
+  <span style="font-size:12px;color:#666">Use the iPhone camera or photo library.</span>
+  <input style="margin-top:12px" type="file" accept="image/*" capture="environment" multiple name="photos">
+</div>
+</section>
+
+<section class="card">
+<h2>7. Tomorrow</h2>
+<textarea name="tomorrow" placeholder="What needs to happen next?"></textarea>
+</section>
+
+<section class="card">
+<h2>8. Sign & Submit</h2>
+<label>Foreman Signature</label>
+<canvas id="sig" style="width:100%;height:150px;border:1px solid #ccc;border-radius:10px;background:#fff;touch-action:none"></canvas>
+<button type="button" class="secondary" onclick="clearSig()">Clear Signature</button>
+<button type="submit" class="primary" style="margin-top:12px">SUBMIT DAILY REPORT</button>
+<div id="status" class="status">✓ FDR-001 is ready to submit. This prototype saves a copy on this device; connecting it to the Fireco OS database is the next step.</div>
+</section>
+</form>
+
+<footer>Fireco OS • FDR-001 • Rev 1.0 Prototype</footer>
+
+<script>
+document.getElementById("date").valueAsDate=new Date();
+let crewCount=0;
+function addCrew(){
+ crewCount++;
+ const d=document.createElement("div"); d.className="crew";
+ d.innerHTML=`<div class="crewgrid">
+ <input name="crew${crewCount}_name" placeholder="Employee">
+ <input name="crew${crewCount}_regular" inputmode="decimal" placeholder="Reg hrs">
+ <input name="crew${crewCount}_ot" inputmode="decimal" placeholder="OT hrs">
+ </div>`;
+ document.getElementById("crew").appendChild(d);
+}
+addCrew();
+
+const canvas=document.getElementById("sig"),ctx=canvas.getContext("2d");
+function resize(){const r=canvas.getBoundingClientRect(),ratio=devicePixelRatio||1;canvas.width=r.width*ratio;canvas.height=r.height*ratio;ctx.scale(ratio,ratio);ctx.lineWidth=2;ctx.lineCap="round"} resize();
+let drawing=false;
+function pos(e){const r=canvas.getBoundingClientRect();const p=e.touches?e.touches[0]:e;return{x:p.clientX-r.left,y:p.clientY-r.top}}
+canvas.addEventListener("pointerdown",e=>{drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)});
+canvas.addEventListener("pointermove",e=>{if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke()});
+["pointerup","pointercancel","pointerleave"].forEach(x=>canvas.addEventListener(x,()=>drawing=false));
+function clearSig(){ctx.clearRect(0,0,canvas.width,canvas.height)}
+
+document.getElementById("report").addEventListener("submit",e=>{
+ e.preventDefault();
+ const data={timestamp:new Date().toISOString(),form:"FDR-001",values:Object.fromEntries(new FormData(e.target).entries()),signature:canvas.toDataURL("image/png")};
+ localStorage.setItem("fireco_fdr001_last",JSON.stringify(data));
+ document.getElementById("status").style.display="block";
+ window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+});
+</script>
+</body>
+</html>
