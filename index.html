@@ -44,14 +44,159 @@ footer{text-align:center;padding:15px;color:#777;font-size:11px}@media(min-width
 </form><footer>Fireco OS • FDR-001 • Rev 2.0 Prototype</footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = "https://ovpqmzxlikrhzxajtday.supabase.co";
-const SUPABASE_KEY = "sb_publishable_wodv28HysVdcm5QTmiDIHw_99b0FbMF";
-
 const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);document.getElementById("date").valueAsDate=new Date();let n=0;
-function addCrew(){n++;let d=document.createElement("div");d.className="crew";d.innerHTML='<div class="crewgrid"><input name="crew'+n+'_name" placeholder="Employee"><input name="crew'+n+'_regular" inputmode="decimal" placeholder="Reg hrs"><input name="crew'+n+'_ot" inputmode="decimal" placeholder="OT hrs"></div>';document.getElementById("crew").appendChild(d)}addCrew();
-const c=document.getElementById("sig"),x=c.getContext("2d");function resize(){let r=c.getBoundingClientRect(),q=devicePixelRatio||1;c.width=r.width*q;c.height=r.height*q;x.setTransform(q,0,0,q,0,0);x.lineWidth=2;x.lineCap="round"}resize();let drawing=false;
-function pos(e){let r=c.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}c.onpointerdown=e=>{drawing=true;let p=pos(e);x.beginPath();x.moveTo(p.x,p.y)};c.onpointermove=e=>{if(drawing){let p=pos(e);x.lineTo(p.x,p.y);x.stroke()}};["pointerup","pointercancel","pointerleave"].forEach(v=>c.addEventListener(v,()=>drawing=false));
-function clearSig(){x.clearRect(0,0,c.width,c.height)}
-document.getElementById("report").onsubmit=e=>{e.preventDefault();localStorage.setItem("fireco_fdr001_last",JSON.stringify({timestamp:new Date().toISOString(),values:Object.fromEntries(new FormData(e.target).entries()),signature:c.toDataURL()}));document.getElementById("ok").style.display="block"}
-</script></body></html>
+
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+document.getElementById("date").valueAsDate = new Date();
+
+let crewCount = 0;
+
+function addCrew() {
+    if (crewCount >= 6) {
+        alert("Maximum of 6 crew members.");
+        return;
+    }
+
+    crewCount++;
+
+    const crew = document.getElementById("crew");
+
+    const row = document.createElement("div");
+    row.className = "crewgrid";
+    row.style.marginBottom = "8px";
+
+    row.innerHTML = `
+        <input
+            type="text"
+            name="crew_${crewCount}_name"
+            placeholder="Employee Name"
+        >
+
+        <input
+            type="number"
+            name="crew_${crewCount}_regular"
+            placeholder="Regular Hours"
+            min="0"
+            step="0.25"
+        >
+
+        <input
+            type="number"
+            name="crew_${crewCount}_overtime"
+            placeholder="OT Hours"
+            min="0"
+            step="0.25"
+        >
+    `;
+
+    crew.appendChild(row);
+}
+
+
+/* SIGNATURE PAD */
+
+const canvas = document.getElementById("sig");
+const ctx = canvas.getContext("2d");
+
+function resizeSignature() {
+    const ratio = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+
+    canvas.width = rect.width * ratio;
+    canvas.height = rect.height * ratio;
+
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+}
+
+resizeSignature();
+window.addEventListener("resize", resizeSignature);
+
+let drawing = false;
+
+function getPosition(e) {
+    const rect = canvas.getBoundingClientRect();
+
+    return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+    };
+}
+
+canvas.addEventListener("pointerdown", function(e) {
+    drawing = true;
+
+    const p = getPosition(e);
+
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+});
+
+canvas.addEventListener("pointermove", function(e) {
+    if (!drawing) return;
+
+    const p = getPosition(e);
+
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+});
+
+canvas.addEventListener("pointerup", function() {
+    drawing = false;
+});
+
+canvas.addEventListener("pointerleave", function() {
+    drawing = false;
+});
+
+
+function clearSig() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+
+/* SUBMIT REPORT */
+
+document.getElementById("report").addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    const form = new FormData(e.target);
+
+    const values = Object.fromEntries(form.entries());
+
+    const crewMembers = [];
+
+    for (let i = 1; i <= crewCount; i++) {
+
+        const name = values[`crew_${i}_name`] || "";
+        const regular = values[`crew_${i}_regular`] || "0";
+        const overtime = values[`crew_${i}_overtime`] || "0";
+
+        if (name.trim() !== "") {
+            crewMembers.push({
+                name: name,
+                regular_hours: Number(regular),
+                overtime_hours: Number(overtime)
+            });
+        }
+    }
+
+    console.log("Crew:", crewMembers);
+
+    localStorage.setItem(
+        "fireco_fdr001_last",
+        JSON.stringify({
+            timestamp: new Date().toISOString(),
+            values: values,
+            crew: crewMembers
+        })
+    );
+
+    document.getElementById("ok").textContent =
+        "FDR-001 saved successfully.";
+
+});
+</script>
