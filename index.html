@@ -208,25 +208,79 @@ if (reportForm) {
 
         e.preventDefault();
 
-        const formData = new FormData(reportForm);
-
-        const values = Object.fromEntries(formData.entries());
-
-        localStorage.setItem(
-            "fireco_fdr001_last",
-            JSON.stringify({
-                timestamp: new Date().toISOString(),
-                values: values
-            })
+        const submitButton = reportForm.querySelector(
+            'button[type="submit"]'
         );
 
-        console.log("FDR-001 saved locally:", values);
+        submitButton.disabled = true;
+        submitButton.textContent = "SUBMITTING...";
 
-        document.getElementById("ok").textContent =
-            "FDR-001 saved on this device.";
+        try {
+
+            const formData = new FormData(reportForm);
+
+            const report = {
+                work_order_id: formData.get("workOrder") || null,
+                report_date: formData.get("date") || null,
+                foreman_id: formData.get("foreman") || null,
+                job_for_assigned_by: formData.get("jobFor") || null,
+                locations: formData.get("locations") || null,
+                work_accomplished: formData.get("work") || null,
+                materials_used: formData.get("materials") || null,
+                completion_status: formData.get("completionStatus") || null,
+                completion_notes: formData.get("completionNotes") || null,
+                tomorrow_plan: formData.get("tomorrow") || null,
+                submitted_at: new Date().toISOString()
+            };
+
+            // Save a backup on the device
+            localStorage.setItem(
+                "fireco_fdr001_last",
+                JSON.stringify(report)
+            );
+
+            // Make sure Supabase is available
+            if (!db) {
+                throw new Error(
+                    "Supabase is not connected. Please check your internet connection and try again."
+                );
+            }
+
+            // Send report to Supabase
+            const { data, error } = await db
+                .from("field_reports")
+                .insert([report])
+                .select();
+
+            if (error) {
+                console.error("Supabase error:", error);
+                throw new Error(error.message);
+            }
+
+            console.log("FDR-001 submitted to Supabase:", data);
+
+            const ok = document.getElementById("ok");
+
+            ok.style.display = "block";
+            ok.textContent =
+                "✓ Daily Report Submitted Successfully";
+
+            submitButton.textContent = "SUBMITTED ✓";
+
+        } catch (error) {
+
+            console.error("FDR-001 submission failed:", error);
+
+            const ok = document.getElementById("ok");
+
+            ok.style.display = "block";
+            ok.style.background = "#fbeaea";
+            ok.textContent =
+                "⚠️ Report could not be submitted: " +
+                error.message;
+
+            submitButton.disabled = false;
+            submitButton.textContent = "SUBMIT DAILY REPORT";
+        }
     });
 }
-</script>
-
-</body>
-</html>
