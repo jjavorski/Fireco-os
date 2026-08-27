@@ -42,8 +42,13 @@ footer{text-align:center;padding:15px;color:#777;font-size:11px}@media(min-width
 <button type="button" class="secondary" onclick="clearSig()">Clear Signature</button>
 <button type="submit" class="primary" style="margin-top:12px">SUBMIT DAILY REPORT</button><div id="ok" class="ok">✓ FDR-001 saved on this device.</div></section>
 </form><footer>Fireco OS • FDR-001 • Rev 2.0 Prototype</footer>
+<script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-document.getElementById("date").valueAsDate=new Date();let n=0;
+const SUPABASE_URL = "https://ovpqmzxlikrhzxajtday.supabase.co";
+const SUPABASE_KEY = "sb_publishable_wodv28HysVdcm5QTmiDIHw_99b0FbMF";
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);document.getElementById("date").valueAsDate=new Date();let n=0;
 function addCrew(){n++;let d=document.createElement("div");d.className="crew";d.innerHTML='<div class="crewgrid"><input name="crew'+n+'_name" placeholder="Employee"><input name="crew'+n+'_regular" inputmode="decimal" placeholder="Reg hrs"><input name="crew'+n+'_ot" inputmode="decimal" placeholder="OT hrs"></div>';document.getElementById("crew").appendChild(d)}addCrew();
 const c=document.getElementById("sig"),x=c.getContext("2d");function resize(){let r=c.getBoundingClientRect(),q=devicePixelRatio||1;c.width=r.width*q;c.height=r.height*q;x.setTransform(q,0,0,q,0,0);x.lineWidth=2;x.lineCap="round"}resize();let drawing=false;
 function pos(e){let r=c.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}c.onpointerdown=e=>{drawing=true;let p=pos(e);x.beginPath();x.moveTo(p.x,p.y)};c.onpointermove=e=>{if(drawing){let p=pos(e);x.lineTo(p.x,p.y);x.stroke()}};["pointerup","pointercancel","pointerleave"].forEach(v=>c.addEventListener(v,()=>drawing=false));
