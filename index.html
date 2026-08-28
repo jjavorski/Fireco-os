@@ -1,286 +1,62 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Fireco OS — FDR-001</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f3f3f3;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial;color:#171717}
-header{background:#111;color:white;padding:22px 18px}.brand{font-size:24px;font-weight:800}.tag{font-size:11px;letter-spacing:1px}.title{margin-top:14px;font-weight:700}
-.card{background:white;margin:14px;border-radius:14px;padding:16px;box-shadow:0 2px 10px #0001}h2{font-size:16px;margin:0 0 12px}
-label{display:block;font-size:12px;font-weight:700;margin:12px 0 6px}input,textarea{width:100%;font-size:16px;border:1px solid #ccc;border-radius:10px;padding:12px;background:white}textarea{min-height:105px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.crew{border:1px solid #ddd;border-radius:10px;padding:10px;margin:8px 0}.crewgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:7px}.crewgrid input{padding:10px}
-.status{border:1px solid #ddd;border-radius:10px;padding:12px;font-size:14px}.status input{width:auto;margin-right:7px}
-.photo{border:2px dashed #bbb;border-radius:12px;padding:18px;text-align:center}button{width:100%;border:0;border-radius:12px;padding:15px;font-size:17px;font-weight:800}
-.primary{background:#111;color:white}.secondary{background:#e8e8e8;margin-top:9px}.ok{display:none;background:#e7f6e9;padding:12px;border-radius:10px;margin-top:10px;font-weight:700}
-footer{text-align:center;padding:15px;color:#777;font-size:11px}@media(min-width:700px){body{max-width:720px;margin:auto}}
-</style></head>
-<body>
+*{box-sizing:border-box}body{margin:0;background:#f3f3f3;color:#171717;font-family:Arial,Helvetica,sans-serif}
+header{background:#111;color:#fff;padding:26px 18px 24px;text-align:center}.brand,.tag,.title{font-family:Georgia,"Times New Roman",serif}.brand{font-size:27px;font-weight:700}.tag{font-size:11px;letter-spacing:1.5px;margin-top:5px}.title{font-size:15px;font-weight:700;margin-top:15px}
+.card{background:#fff;margin:14px;border-radius:14px;padding:16px;box-shadow:0 2px 10px #0001}h2{font-size:16px;margin:0 0 12px}label{display:block;font-size:12px;font-weight:700;margin:12px 0 6px}
+input,textarea{width:100%;font-size:16px;border:1px solid #ccc;border-radius:10px;padding:12px;background:#fff}textarea{min-height:105px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.crew{border:1px solid #ddd;border-radius:10px;padding:10px;margin:8px 0}.crewgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:7px}.crewgrid input{padding:10px}
+.status{border:1px solid #ddd;border-radius:10px;padding:12px;font-size:14px}.status input{width:auto;margin-right:7px}.photo{border:2px dashed #bbb;border-radius:12px;padding:18px;text-align:center}
+button{width:100%;border:0;border-radius:12px;padding:15px;font-size:17px;font-weight:800;cursor:pointer}button:disabled{opacity:.55}.primary{background:#111;color:#fff}.secondary{background:#e8e8e8;margin-top:9px}
+.ok{display:none;padding:12px;border-radius:10px;margin-top:10px;font-weight:700}.success{background:#e7f6e9}.error{background:#fbeaea}
+#sig{display:block;width:100%;height:150px;border:1px solid #ccc;border-radius:10px;background:#fff;touch-action:none}.small{font-size:12px;color:#666}footer{text-align:center;padding:15px;color:#777;font-size:11px}
+@media(max-width:520px){.row{grid-template-columns:1fr}.crewgrid{grid-template-columns:1.4fr 1fr 1fr}}@media(min-width:700px){body{max-width:720px;margin:auto}}
+</style></head><body>
 <header><div class="brand">FIRECO, INC.</div><div class="tag">WE TAKE LIFE SAFETY SERIOUSLY</div><div class="title">FDR-001 • DAILY FIELD REPORT</div></header>
 <form id="report">
 <section class="card"><h2>1. Project</h2>
 <label>Job For / Assigned By</label><input name="jobFor" placeholder="Customer, GC, PM, or person who assigned the work">
 <div class="row"><div><label>Project</label><input name="project" placeholder="Project name"></div><div><label>Work Order Number</label><input name="workOrder" placeholder="Work order number"></div></div>
-<div class="row"><div><label>Date</label><input id="date" name="date" type="date"></div><div><label>Foreman</label><input name="foreman" placeholder="Foreman"></div></div></section>
-
-<section class="card"><h2>2. Crew & Hours</h2><div style="font-size:12px;color:#666">Add only the people who worked today.</div><div id="crew"></div><button type="button" class="secondary" onclick="addCrew()">+ Add Crew Member</button></section>
-
-<section class="card"><h2>3. Today's Work</h2>
-<label>Where did you work?</label><input name="locations" placeholder="Building / floor / room / area">
+<label>Date</label><input id="date" name="date" type="date"></section>
+<section class="card"><h2>2. Crew & Hours</h2><div class="small">Add only the people who worked today.</div><div id="crew"></div><button type="button" class="secondary" id="addCrewButton">+ Add Crew Member</button></section>
+<section class="card"><h2>3. Today's Work</h2><label>Where did you work?</label><input name="locations" placeholder="Building / floor / room / area">
 <label>What did you accomplish?</label><textarea name="work" placeholder="Briefly describe today's work..."></textarea>
 <label>Materials installed / used</label><textarea name="materials" placeholder="Materials and quantities, if useful..."></textarea></section>
-
 <section class="card"><h2>4. Completion / Invoicing Status</h2>
 <label class="status"><input type="radio" name="completionStatus" value="Ready to Invoice">✓ Work Complete — Ready to Invoice</label>
 <label class="status"><input type="radio" name="completionStatus" value="Not Complete">Work Not Complete</label>
 <label>Completion Notes</label><textarea name="completionNotes" placeholder="If not complete, what remains? If ready to invoice, add any useful final notes."></textarea></section>
-
-<section class="card"><h2>5. Photos</h2><div class="photo"><strong>Add job photos</strong><br><span style="font-size:12px;color:#666">Choose existing photos or take new photos.</span>
-<input style="margin-top:12px" type="file" accept="image/*" multiple name="photos"></div></section>
-
+<section class="card"><h2>5. Photos</h2><div class="photo"><strong>Add job photos</strong><br><span class="small">Choose existing photos or take new photos.</span>
+<input id="photos" style="margin-top:12px" type="file" accept="image/*" multiple name="photos"></div></section>
 <section class="card"><h2>6. Tomorrow</h2><textarea name="tomorrow" placeholder="What needs to happen next?"></textarea></section>
-
-<section class="card"><h2>7. Sign & Submit</h2><label>Foreman Signature</label>
-<canvas id="sig" style="width:100%;height:150px;border:1px solid #ccc;border-radius:10px;background:#fff;touch-action:none"></canvas>
-<button type="button" class="secondary" onclick="clearSig()">Clear Signature</button>
-<button type="submit" class="primary" style="margin-top:12px">SUBMIT DAILY REPORT</button><div id="ok" class="ok">✓ FDR-001 saved on this device.</div></section>
-</form><footer>Fireco OS • FDR-001 • Rev 2.0 Prototype</footer>
+<section class="card"><h2>7. Sign & Submit</h2><label>Foreman Signature</label><canvas id="sig"></canvas>
+<button type="button" class="secondary" id="clearSigButton">Clear Signature</button>
+<button type="submit" class="primary" style="margin-top:12px" id="submitButton">SUBMIT DAILY REPORT</button><div id="ok" class="ok"></div></section>
+</form><footer>Fireco OS • FDR-001 • Rev 3.0</footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = "https://ovpqmzxlikrhzxajtday.supabase.co";
-const SUPABASE_KEY = "sb_publishable_wodv28HysVdcm5QTmiDIHw_99b0FbMF";
-
-let db = null;
-let crewCount = 0;
-
-// Load Supabase without allowing it to break the rest of the form
-function initializeSupabase() {
-    try {
-        if (window.supabase && window.supabase.createClient) {
-            db = window.supabase.createClient(
-                SUPABASE_URL,
-                SUPABASE_KEY
-            );
-            console.log("Supabase connected.");
-        } else {
-            console.warn("Supabase library not available. Form will still work.");
-        }
-    } catch (error) {
-        console.warn("Supabase initialization failed:", error);
-    }
-}
-
-// Set today's date
-document.addEventListener("DOMContentLoaded", function () {
-    const dateField = document.getElementById("date");
-
-    if (dateField && !dateField.value) {
-        dateField.valueAsDate = new Date();
-    }
-
-    initializeSupabase();
-});
-
-// ADD CREW MEMBER
-window.addCrew = function() {
-
-    if (crewCount >= 6) {
-        alert("Maximum of 6 crew members.");
-        return;
-    }
-
-    crewCount++;
-
-    const crew = document.getElementById("crew");
-
-    if (!crew) {
-        alert("Crew section could not be found.");
-        return;
-    }
-
-    const row = document.createElement("div");
-
-    row.className = "crewgrid";
-    row.style.marginBottom = "10px";
-
-    row.innerHTML = `
-        <input
-            type="text"
-            name="crew_${crewCount}_name"
-            placeholder="Employee Name"
-        >
-
-        <input
-            type="number"
-            name="crew_${crewCount}_regular"
-            placeholder="Regular Hours"
-            min="0"
-            step="0.25"
-        >
-
-        <input
-            type="number"
-            name="crew_${crewCount}_overtime"
-            placeholder="OT Hours"
-            min="0"
-            step="0.25"
-        >
-    `;
-
-    crew.appendChild(row);
-}
-
-// SIGNATURE PAD
-const canvas = document.getElementById("sig");
-
-if (canvas) {
-
-    const ctx = canvas.getContext("2d");
-
-    function resizeSignature() {
-
-        const ratio = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
-
-        canvas.width = rect.width * ratio;
-        canvas.height = rect.height * ratio;
-
-        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-
-        ctx.lineWidth = 2;
-        ctx.lineCap = "round";
-    }
-
-    resizeSignature();
-
-    window.addEventListener("resize", resizeSignature);
-
-    let drawing = false;
-
-    function getPosition(e) {
-
-        const rect = canvas.getBoundingClientRect();
-
-        return {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
-        };
-    }
-
-    canvas.addEventListener("pointerdown", function(e) {
-
-        drawing = true;
-
-        canvas.setPointerCapture(e.pointerId);
-
-        const pos = getPosition(e);
-
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-    });
-
-    canvas.addEventListener("pointermove", function(e) {
-
-        if (!drawing) return;
-
-        const pos = getPosition(e);
-
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-    });
-
-    canvas.addEventListener("pointerup", function() {
-        drawing = false;
-    });
-
-    canvas.addEventListener("pointercancel", function() {
-        drawing = false;
-    });
-
-    window.clearSig = function() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    };
-}
-
-// SUBMIT
-const reportForm = document.getElementById("report");
-
-if (reportForm) {
-
-    reportForm.addEventListener("submit", async function(e) {
-
-        e.preventDefault();
-
-        const submitButton = reportForm.querySelector(
-            'button[type="submit"]'
-        );
-
-        submitButton.disabled = true;
-        submitButton.textContent = "SUBMITTING...";
-
-        try {
-
-            const formData = new FormData(reportForm);
-
-            const report = {
-                work_order_id: formData.get("workOrder") || null,
-                report_date: formData.get("date") || null,
-                foreman_id: formData.get("foreman") || null,
-                job_for_assigned_by: formData.get("jobFor") || null,
-                locations: formData.get("locations") || null,
-                work_accomplished: formData.get("work") || null,
-                materials_used: formData.get("materials") || null,
-                completion_status: formData.get("completionStatus") || null,
-                completion_notes: formData.get("completionNotes") || null,
-                tomorrow_plan: formData.get("tomorrow") || null,
-                submitted_at: new Date().toISOString()
-            };
-
-            // Save a backup on the device
-            localStorage.setItem(
-                "fireco_fdr001_last",
-                JSON.stringify(report)
-            );
-
-            // Make sure Supabase is available
-            if (!db) {
-                throw new Error(
-                    "Supabase is not connected. Please check your internet connection and try again."
-                );
-            }
-
-            // Send report to Supabase
-            const { data, error } = await db
-                .from("field_reports")
-                .insert([report])
-                .select();
-
-            if (error) {
-                console.error("Supabase error:", error);
-                throw new Error(error.message);
-            }
-
-            console.log("FDR-001 submitted to Supabase:", data);
-
-            const ok = document.getElementById("ok");
-
-            ok.style.display = "block";
-            ok.textContent =
-                "✓ Daily Report Submitted Successfully";
-
-            submitButton.textContent = "SUBMITTED ✓";
-
-        } catch (error) {
-
-            console.error("FDR-001 submission failed:", error);
-
-            const ok = document.getElementById("ok");
-
-            ok.style.display = "block";
-            ok.style.background = "#fbeaea";
-            ok.textContent =
-                "⚠️ Report could not be submitted: " +
-                error.message;
-
-            submitButton.disabled = false;
-            submitButton.textContent = "SUBMIT DAILY REPORT";
-        }
-    });
-}
+"use strict";
+const SUPABASE_URL="https://ovpqmzxlikrhzxajtday.supabase.co";
+const SUPABASE_KEY="sb_publishable_wodv28HysVdcm5QTmiDIHw_99b0FbMF";
+let db=null,crewCount=0;
+
+function msg(t,c){const x=document.getElementById("ok");x.textContent=t;x.className="ok "+c;x.style.display="block"}
+function addCrew(){if(crewCount>=6){alert("Maximum of 6 crew members.");return}crewCount++;const r=document.createElement("div");r.className="crew";r.innerHTML='<div class="crewgrid"><input type="text" name="crew_'+crewCount+'_name" placeholder="Employee Name"><input type="number" name="crew_'+crewCount+'_regular" placeholder="Regular Hours" min="0" step="0.25"><input type="number" name="crew_'+crewCount+'_overtime" placeholder="OT Hours" min="0" step="0.25"></div>';document.getElementById("crew").appendChild(r)}
+window.addCrew=addCrew;
+function clearSig(){const c=document.getElementById("sig");c.getContext("2d").clearRect(0,0,c.width,c.height)}window.clearSig=clearSig;
+
+function setupSig(){const c=document.getElementById("sig"),x=c.getContext("2d");let d=false;function size(){const r=c.getBoundingClientRect(),q=devicePixelRatio||1;c.width=r.width*q;c.height=r.height*q;x.setTransform(q,0,0,q,0,0);x.lineWidth=2;x.lineCap="round"}size();addEventListener("resize",size);function p(e){const r=c.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}c.addEventListener("pointerdown",e=>{d=true;c.setPointerCapture(e.pointerId);const a=p(e);x.beginPath();x.moveTo(a.x,a.y)});c.addEventListener("pointermove",e=>{if(!d)return;const a=p(e);x.lineTo(a.x,a.y);x.stroke()});c.addEventListener("pointerup",()=>d=false);c.addEventListener("pointercancel",()=>d=false)}
+function collectCrew(){const a=[];for(let i=1;i<=crewCount;i++)a.push({name:document.querySelector('[name="crew_'+i+'_name"]').value,regular:document.querySelector('[name="crew_'+i+'_regular"]').value,overtime:document.querySelector('[name="crew_'+i+'_overtime"]').value});return a}
+
+async function submitReport(e){e.preventDefault();const b=document.getElementById("submitButton");b.disabled=true;b.textContent="SUBMITTING...";document.getElementById("ok").style.display="none";try{
+if(!db)throw new Error("Database connection is not available.");
+const f=new FormData(document.getElementById("report"));
+const report={work_order_id:f.get("workOrder")||null,report_date:f.get("date")||null,foreman_id:null,job_for_assigned_by:f.get("jobFor")||null,locations:f.get("locations")||null,work_accomplished:f.get("work")||null,materials_used:f.get("materials")||null,completion_status:f.get("completionStatus")||null,completion_notes:f.get("completionNotes")||null,tomorrow_plan:f.get("tomorrow")||null};
+const {data,error}=await db.from("field_reports").insert(report).select().single();if(error)throw error;
+localStorage.setItem("fireco_fdr001_last",JSON.stringify({report,crew:collectCrew(),savedAt:new Date().toISOString()}));console.log("FDR-001 submitted:",data);msg("✓ Daily Report Submitted Successfully","success");b.textContent="SUBMITTED ✓";
+}catch(err){console.error("FDR-001 submission failed:",err);msg("⚠️ Report could not be submitted: "+(err.message||"Unknown error"),"error");b.disabled=false;b.textContent="SUBMIT DAILY REPORT"}}
+
+document.addEventListener("DOMContentLoaded",()=>{const d=document.getElementById("date");if(d&&!d.value)d.valueAsDate=new Date();document.getElementById("addCrewButton").addEventListener("click",addCrew);document.getElementById("clearSigButton").addEventListener("click",clearSig);document.getElementById("report").addEventListener("submit",submitReport);setupSig();try{if(window.supabase&&typeof window.supabase.createClient==="function"){db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);console.log("Supabase connected.")}else console.warn("Supabase library unavailable.")}catch(e){console.error("Supabase initialization failed:",e)}});
+</script></body></html>
