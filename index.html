@@ -50,13 +50,77 @@ function clearSig(){const c=document.getElementById("sig");c.getContext("2d").cl
 function setupSig(){const c=document.getElementById("sig"),x=c.getContext("2d");let d=false;function size(){const r=c.getBoundingClientRect(),q=devicePixelRatio||1;c.width=r.width*q;c.height=r.height*q;x.setTransform(q,0,0,q,0,0);x.lineWidth=2;x.lineCap="round"}size();addEventListener("resize",size);function p(e){const r=c.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}c.addEventListener("pointerdown",e=>{d=true;c.setPointerCapture(e.pointerId);const a=p(e);x.beginPath();x.moveTo(a.x,a.y)});c.addEventListener("pointermove",e=>{if(!d)return;const a=p(e);x.lineTo(a.x,a.y);x.stroke()});c.addEventListener("pointerup",()=>d=false);c.addEventListener("pointercancel",()=>d=false)}
 function collectCrew(){const a=[];for(let i=1;i<=crewCount;i++)a.push({name:document.querySelector('[name="crew_'+i+'_name"]').value,regular:document.querySelector('[name="crew_'+i+'_regular"]').value,overtime:document.querySelector('[name="crew_'+i+'_overtime"]').value});return a}
 
-async function submitReport(e){e.preventDefault();const b=document.getElementById("submitButton");b.disabled=true;b.textContent="SUBMITTING...";document.getElementById("ok").style.display="none";try{
-if(!db)throw new Error("Database connection is not available.");
-const f=new FormData(document.getElementById("report"));
-const report={work_order_id:f.get("workOrder")||null,report_date:f.get("date")||null,foreman_id:null,job_for_assigned_by:f.get("jobFor")||null,locations:f.get("locations")||null,work_accomplished:f.get("work")||null,materials_used:f.get("materials")||null,completion_status:f.get("completionStatus")||null,completion_notes:f.get("completionNotes")||null,tomorrow_plan:f.get("tomorrow")||null};
-const {data,error}=await db.from("field_reports").insert(report).select().single();if(error)throw error;
-localStorage.setItem("fireco_fdr001_last",JSON.stringify({report,crew:collectCrew(),savedAt:new Date().toISOString()}));console.log("FDR-001 submitted:",data);msg("✓ Daily Report Submitted Successfully","success");b.textContent="SUBMITTED ✓";
-}catch(err){console.error("FDR-001 submission failed:",err);msg("⚠️ Report could not be submitted: "+(err.message||"Unknown error"),"error");b.disabled=false;b.textContent="SUBMIT DAILY REPORT"}}
+async function submitReport(e){
+    e.preventDefault();
+
+    const b=document.getElementById("submitButton");
+
+    b.disabled=true;
+    b.textContent="SUBMITTING...";
+
+    document.getElementById("ok").style.display="none";
+
+    try{
+
+        if(!db){
+            throw new Error("Database connection is not available.");
+        }
+
+        const f=new FormData(document.getElementById("report"));
+
+        const report={
+            work_order_number:f.get("workOrder")||null,
+            report_date:f.get("date")||null,
+            foreman_name:null,
+            job_for_assigned_by:f.get("jobFor")||null,
+            locations:f.get("locations")||null,
+            work_accomplished:f.get("work")||null,
+            materials_used:f.get("materials")||null,
+            completion_status:f.get("completionStatus")||null,
+            completion_notes:f.get("completionNotes")||null,
+            tomorrow_plan:f.get("tomorrow")||null
+        };
+
+        const {error}=await db
+            .from("field_reports")
+            .insert(report);
+
+        if(error){
+            throw error;
+        }
+
+        localStorage.setItem(
+            "fireco_fdr001_last",
+            JSON.stringify({
+                report:report,
+                crew:collectCrew(),
+                savedAt:new Date().toISOString()
+            })
+        );
+
+        console.log("FDR-001 submitted:",report);
+
+        msg(
+            "✓ Daily Report Submitted Successfully",
+            "success"
+        );
+
+        b.textContent="SUBMITTED ✓";
+
+    }catch(err){
+
+        console.error("FDR-001 submission failed:",err);
+
+        msg(
+            "⚠️ Report could not be submitted: "+
+            (err.message||"Unknown error"),
+            "error"
+        );
+
+        b.disabled=false;
+        b.textContent="SUBMIT DAILY REPORT";
+    }
+}
 
 document.addEventListener("DOMContentLoaded",()=>{const d=document.getElementById("date");if(d&&!d.value)d.valueAsDate=new Date();document.getElementById("addCrewButton").addEventListener("click",addCrew);document.getElementById("clearSigButton").addEventListener("click",clearSig);document.getElementById("report").addEventListener("submit",submitReport);setupSig();try{if(window.supabase&&typeof window.supabase.createClient==="function"){db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);console.log("Supabase connected.")}else console.warn("Supabase library unavailable.")}catch(e){console.error("Supabase initialization failed:",e)}});
 </script></body></html>
