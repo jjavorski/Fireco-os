@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Fireco OS — Office Dashboard</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#f3f3f3;
+  color:#171717;
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+header{
+  background:#111;
+  color:#fff;
+  padding:26px 18px 24px;
+  text-align:center;
+}
+
+.brand{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:27px;
+  font-weight:700;
+}
+
+.tag{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:11px;
+  letter-spacing:1.5px;
+  margin-top:5px;
+}
+
+.title{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:17px;
+  font-weight:700;
+  margin-top:15px;
+}
+
+.container{
+  max-width:1100px;
+  margin:20px auto;
+  padding:0 14px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.stat{
+  background:#fff;
+  border-radius:14px;
+  padding:18px;
+  box-shadow:0 2px 10px #0001;
+}
+
+.stat-label{
+  font-size:12px;
+  font-weight:700;
+  color:#666;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+
+.stat-number{
+  font-size:30px;
+  font-weight:800;
+  margin-top:6px;
+}
+
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:18px;
+  box-shadow:0 2px 10px #0001;
+}
+
+.card h2{
+  margin:0 0 15px;
+  font-size:18px;
+}
+
+.toolbar{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.toolbar input{
+  flex:1;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:10px;
+  font-size:15px;
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:12px 16px;
+  font-weight:700;
+  cursor:pointer;
+  background:#111;
+  color:#fff;
+}
+
+.report{
+  border:1px solid #ddd;
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:10px;
+}
+
+.report-top{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  align-items:center;
+}
+
+.report-date{
+  font-weight:800;
+  font-size:16px;
+}
+
+.status{
+  padding:6px 9px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:800;
+}
+
+.ready{
+  background:#e7f6e9;
+}
+
+.incomplete{
+  background:#fff3cd;
+}
+
+.detail{
+  margin-top:10px;
+  font-size:14px;
+  line-height:1.5;
+}
+
+.detail strong{
+  display:inline-block;
+  min-width:125px;
+}
+
+.empty{
+  padding:25px;
+  text-align:center;
+  color:#777;
+}
+
+.error{
+  background:#fbeaea;
+  color:#8a1f1f;
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:15px;
+}
+
+@media(max-width:700px){
+  .stats{
+    grid-template-columns:1fr;
+  }
+
+  .toolbar{
+    flex-direction:column;
+  }
+
+  .report-top{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="brand">FIRECO, INC.</div>
+  <div class="tag">WE TAKE LIFE SAFETY SERIOUSLY</div>
+  <div class="title">OFFICE DASHBOARD</div>
+</header>
+
+<div class="container">
+
+  <div id="errorBox"></div>
+
+  <section class="stats">
+    <div class="stat">
+      <div class="stat-label">Total Reports</div>
+      <div class="stat-number" id="totalReports">0</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Ready to Invoice</div>
+      <div class="stat-number" id="readyReports">0</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Not Complete</div>
+      <div class="stat-number" id="incompleteReports">0</div>
+    </div>
+  </section>
+
+  <section class="card">
+
+    <h2>Field Reports</h2>
+
+    <div class="toolbar">
+      <input
+        id="search"
+        type="text"
+        placeholder="Search reports..."
+      >
+
+      <button id="refreshButton">
+        Refresh
+      </button>
+    </div>
+
+    <div id="reports">
+      <div class="empty">
+        Loading field reports...
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+"use strict";
+
+const SUPABASE_URL =
+  "https://ovpqmzxlikrhzxajtday.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_wodv28HysVdcm5QTmiDIHw_99b0FbMF";
+
+let db = null;
+let allReports = [];
+
+function escapeHtml(value){
+  if(value === null || value === undefined) return "";
+
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function showError(message){
+  document.getElementById("errorBox").innerHTML =
+    '<div class="error">⚠️ '+escapeHtml(message)+'</div>';
+}
+
+function formatDate(value){
+  if(!value) return "No date";
+
+  const parts = String(value).split("-");
+
+  if(parts.length === 3){
+    return parts[1] + "/" + parts[2] + "/" + parts[0];
+  }
+
+  return value;
+}
+
+function renderReports(){
+
+  const box = document.getElementById("reports");
+  const search =
+    document.getElementById("search").value
+      .trim()
+      .toLowerCase();
+
+  const filtered = allReports.filter(report => {
+
+    const text = [
+      report.report_date,
+      report.job_for_assigned_by,
+      report.locations,
+      report.work_accomplished,
+      report.materials_used,
+      report.completion_status,
+      report.completion_notes,
+      report.tomorrow_plan
+    ]
+    .join(" ")
+    .toLowerCase();
+
+    return text.includes(search);
+  });
+
+  document.getElementById("totalReports").textContent =
+    allReports.length;
+
+  document.getElementById("readyReports").textContent =
+    allReports.filter(r =>
+      r.completion_status === "ready_to_invoice"
+    ).length;
+
+  document.getElementById("incompleteReports").textContent =
+    allReports.filter(r =>
+      r.completion_status === "not_complete"
+    ).length;
+
+  if(!filtered.length){
+
+    box.innerHTML =
+      '<div class="empty">No field reports found.</div>';
+
+    return;
+  }
+
+  box.innerHTML = filtered.map(report => {
+
+    const isReady =
+      report.completion_status === "ready_to_invoice";
+
+    const statusText =
+      isReady
+        ? "READY TO INVOICE"
+        : "NOT COMPLETE";
+
+    const statusClass =
+      isReady
+        ? "ready"
+        : "incomplete";
+
+    return `
+      <div class="report">
+
+        <div class="report-top">
+
+          <div class="report-date">
+            ${escapeHtml(formatDate(report.report_date))}
+          </div>
+
+          <div class="status ${statusClass}">
+            ${statusText}
+          </div>
+
+        </div>
+
+        <div class="detail">
+
+          <div>
+            <strong>Job For:</strong>
+            ${escapeHtml(report.job_for_assigned_by || "—")}
+          </div>
+
+          <div>
+            <strong>Location:</strong>
+            ${escapeHtml(report.locations || "—")}
+          </div>
+
+          <div>
+            <strong>Work Accomplished:</strong>
+            ${escapeHtml(report.work_accomplished || "—")}
+          </div>
+
+          <div>
+            <strong>Materials:</strong>
+            ${escapeHtml(report.materials_used || "—")}
+          </div>
+
+          <div>
+            <strong>Notes:</strong>
+            ${escapeHtml(report.completion_notes || "—")}
+          </div>
+
+          <div>
+            <strong>Tomorrow:</strong>
+            ${escapeHtml(report.tomorrow_plan || "—")}
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+  }).join("");
+}
+
+async function loadReports(){
+
+  document.getElementById("reports").innerHTML =
+    '<div class="empty">Loading field reports...</div>';
+
+  document.getElementById("errorBox").innerHTML = "";
+
+  try{
+
+    const {data,error} =
+      await db
+        .from("field_reports")
+        .select("*")
+        .order("report_date",{ascending:false})
+        .order("created_at",{ascending:false});
+
+    if(error) throw error;
+
+    allReports = data || [];
+
+    renderReports();
+
+    console.log(
+      "Fireco OS reports loaded:",
+      allReports
+    );
+
+  }catch(error){
+
+    console.error(
+      "Could not load field reports:",
+      error
+    );
+
+    showError(
+      error.message || "Could not load field reports."
+    );
+
+    document.getElementById("reports").innerHTML =
+      '<div class="empty">Unable to load reports.</div>';
+  }
+}
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async () => {
+
+    db =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+    document
+      .getElementById("search")
+      .addEventListener(
+        "input",
+        renderReports
+      );
+
+    document
+      .getElementById("refreshButton")
+      .addEventListener(
+        "click",
+        loadReports
+      );
+
+    await loadReports();
+  }
+);
+
+</script>
+
+</body>
+</html>
