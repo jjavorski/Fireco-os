@@ -445,6 +445,7 @@ function openReport(reportId){
     (report.tomorrow_plan || "—")
   );
 }
+window.openReport = openReport;  
 async function loadReports(){
 
   document.getElementById("reports").innerHTML =
