@@ -338,22 +338,27 @@ document.getElementById("incompleteReports").textContent =
 
   box.innerHTML = filtered.map(report => {
 
-    const isReady =
-      report.completion_status === "ready_to_invoice";
+    const status =
+  String(report.completion_status || "")
+    .toLowerCase()
+    .trim();
 
-    const statusText =
-      isReady
-        ? "READY TO INVOICE"
-        : "NOT COMPLETE";
+const isReady =
+  status === "ready_to_invoice" ||
+  status === "ready to invoice";
 
-    const statusClass =
-      isReady
-        ? "ready"
-        : "incomplete";
+const statusText =
+  isReady
+    ? "READY TO INVOICE"
+    : "NOT COMPLETE";
 
-    return `
-      <div class="report">
+const statusClass =
+  isReady
+    ? "ready"
+    : "incomplete";
 
+   return `
+      <div class="report" onclick="openReport('${report.id}')" style="cursor:pointer">
         <div class="report-top">
 
           <div class="report-date">
