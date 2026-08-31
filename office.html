@@ -410,7 +410,41 @@ const statusClass =
 
   }).join("");
 }
+function openReport(reportId){
 
+  const report =
+    allReports.find(r => String(r.id) === String(reportId));
+
+  if(!report){
+    alert("Report could not be found.");
+    return;
+  }
+
+  alert(
+    "FDR-001 REPORT\n\n" +
+
+    "Date: " + formatDate(report.report_date) + "\n" +
+    "Job For: " + (report.job_for_assigned_by || "—") + "\n" +
+    "Work Order: " + (report.work_order_id || "—") + "\n\n" +
+
+    "Location: " + (report.locations || "—") + "\n\n" +
+
+    "Work Accomplished:\n" +
+    (report.work_accomplished || "—") + "\n\n" +
+
+    "Materials:\n" +
+    (report.materials_used || "—") + "\n\n" +
+
+    "Completion Status: " +
+    (report.completion_status || "—") + "\n\n" +
+
+    "Completion Notes:\n" +
+    (report.completion_notes || "—") + "\n\n" +
+
+    "Tomorrow:\n" +
+    (report.tomorrow_plan || "—")
+  );
+}
 async function loadReports(){
 
   document.getElementById("reports").innerHTML =
