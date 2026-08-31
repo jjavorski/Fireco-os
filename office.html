@@ -317,14 +317,16 @@ function renderReports(){
     allReports.length;
 
   document.getElementById("readyReports").textContent =
-    allReports.filter(r =>
-      r.completion_status === "ready_to_invoice"
-    ).length;
+  allReports.filter(r => {
+    const status = String(r.completion_status || "").toLowerCase().trim();
+    return status === "ready_to_invoice" || status === "ready to invoice";
+  }).length;
 
-  document.getElementById("incompleteReports").textContent =
-    allReports.filter(r =>
-      r.completion_status === "not_complete"
-    ).length;
+document.getElementById("incompleteReports").textContent =
+  allReports.filter(r => {
+    const status = String(r.completion_status || "").toLowerCase().trim();
+    return status === "not_complete" || status === "not complete";
+  }).length;
 
   if(!filtered.length){
 
