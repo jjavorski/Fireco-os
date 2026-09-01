@@ -81,13 +81,41 @@ async function submitReport(e){
             tomorrow_plan:f.get("tomorrow")||null
         };
 
-        const {error}=await db
-            .from("field_reports")
-            .insert(report);
+        const {data: savedReport, error: reportError} = await db
+    .from("field_reports")
+    .insert(report)
+    .select("id")
+    .single();
 
-        if(error){
-            throw error;
+if(reportError){
+    throw reportError;
+}
+
+const crew = collectCrew();
+
+if(crew.length > 0){
+
+    const crewRows = crew
+        .filter(person => person.name.trim() !== "")
+        .map(person => ({
+            field_report_id: savedReport.id,
+            employee_id: null,
+            employee_name: person.name.trim(),
+            regular_hours: person.regular === "" ? 0 : Number(person.regular),
+            overtime_hours: person.overtime === "" ? 0 : Number(person.overtime)
+        }));
+
+    if(crewRows.length > 0){
+
+        const {error: crewError} = await db
+            .from("field_report_crew")
+            .insert(crewRows);
+
+        if(crewError){
+            throw crewError;
         }
+    }
+}
 
         localStorage.setItem(
             "fireco_fdr001_last",
