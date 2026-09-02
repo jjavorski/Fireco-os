@@ -466,7 +466,31 @@ async function loadReports(){
 
     allReports = data || [];
 
-    renderReports();
+const reportIds = allReports.map(report => report.id);
+
+if(reportIds.length > 0){
+
+  const {data: crewData, error: crewError} = await db
+    .from("field_report_crew")
+    .select("*")
+    .in("field_report_id", reportIds);
+
+  if(crewError){
+    throw crewError;
+  }
+
+  allReports.forEach(report => {
+    report.crew = crewData.filter(
+      crew => String(crew.field_report_id) === String(report.id)
+    );
+  });
+
+}else{
+
+  allReports = [];
+}
+
+renderReports();
 
     console.log(
       "Fireco OS reports loaded:",
