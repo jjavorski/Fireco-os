@@ -420,12 +420,33 @@ function openReport(reportId){
     return;
   }
 
+  let crewText = "No crew recorded.";
+
+  if(report.crew && report.crew.length > 0){
+
+    crewText = report.crew.map(person => {
+
+      return (
+        (person.employee_name || "Unnamed Employee") +
+        " — Regular: " +
+        (person.regular_hours ?? 0) +
+        " hrs, OT: " +
+        (person.overtime_hours ?? 0) +
+        " hrs"
+      );
+
+    }).join("\n");
+  }
+
   alert(
     "FDR-001 REPORT\n\n" +
 
     "Date: " + formatDate(report.report_date) + "\n" +
     "Job For: " + (report.job_for_assigned_by || "—") + "\n" +
     "Work Order: " + (report.work_order_number || "—") + "\n\n" +
+
+    "CREW & HOURS:\n" +
+    crewText + "\n\n" +
 
     "Location: " + (report.locations || "—") + "\n\n" +
 
