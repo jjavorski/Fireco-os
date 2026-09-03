@@ -306,21 +306,27 @@ function renderReports(){
 
   const filtered = allReports.filter(report => {
 
-    const text = [
-      report.report_date,
-      report.job_for_assigned_by,
-      report.locations,
-      report.work_accomplished,
-      report.materials_used,
-      report.completion_status,
-      report.completion_notes,
-      report.tomorrow_plan
-    ]
-    .join(" ")
-    .toLowerCase();
+  const crewText = (report.crew || [])
+    .map(person => person.employee_name || "")
+    .join(" ");
 
-    return text.includes(search);
-  });
+  const text = [
+    report.report_date,
+    report.work_order_number,
+    report.job_for_assigned_by,
+    crewText,
+    report.locations,
+    report.work_accomplished,
+    report.materials_used,
+    report.completion_status,
+    report.completion_notes,
+    report.tomorrow_plan
+  ]
+  .join(" ")
+  .toLowerCase();
+
+  return text.includes(search);
+});
 
   document.getElementById("totalReports").textContent =
     allReports.length;
