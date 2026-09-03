@@ -310,7 +310,7 @@ function renderReports(){
     .map(person => person.employee_name || "")
     .join(" ");
 
- const formattedReportDate = formatDate(report.report_date);
+ const formattedReportDate = formatDate(String(report.report_date || "").substring(0, 10));
 
 const text = [
   report.report_date,
