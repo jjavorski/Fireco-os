@@ -310,8 +310,11 @@ function renderReports(){
     .map(person => person.employee_name || "")
     .join(" ");
 
-  const text = [
-    report.report_date,
+ const formattedReportDate = formatDate(report.report_date);
+
+const text = [
+  report.report_date,
+  formattedReportDate,,
     report.work_order_number,
     report.job_for_assigned_by,
     crewText,
