@@ -417,7 +417,10 @@ const statusClass =
     <strong>Project:</strong>
     ${escapeHtml(report.project_name || "—")}
   </div>
-
+<div>
+  <strong>Work Order:</strong>
+  ${escapeHtml(report.work_order_number || "—")}
+</div>
   <div>
     <strong>Job For:</strong>
     ${escapeHtml(report.job_for_assigned_by || "—")}
