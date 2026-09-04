@@ -579,10 +579,16 @@ async function openReport(reportId){
         escapeHtml(report.materials_used || "—") +
       '</div>' +
 
-      '<h3>Completion Status</h3>' +
-      '<div>' +
-        escapeHtml(report.completion_status || "—") +
-      '</div>' +
+     '<h3>Completion Status</h3>' +
+'<div>' +
+  escapeHtml(
+    report.completion_status === "ready_to_invoice"
+      ? "Ready to Invoice"
+      : report.completion_status === "not_complete"
+        ? "Not Complete"
+        : (report.completion_status || "—")
+  ) +
+'</div>' +
 
       '<h3>Completion Notes</h3>' +
       '<div style="white-space:pre-wrap;">' +
