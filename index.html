@@ -18,14 +18,14 @@ button{width:100%;border:0;border-radius:12px;padding:15px;font-size:17px;font-w
 <form id="report">
 <section class="card"><h2>1. Project</h2>
 <label>Job For / Assigned By</label><input name="jobFor" placeholder="Customer, GC, PM, or person who assigned the work">
-<div class="row"><div><label>Project</label><input name="project" placeholder="Project name"></div><div><label>Work Order Number</label><input name="workOrder" placeholder="Work order number"></div></div>
+<div class="row"><div><label>Project</label><input name="project" placeholder="Project name" required></div><div><label>Work Order Number</label><input name="workOrder" placeholder="Work order number" required></div></div>
 <label>Date</label><input id="date" name="date" type="date"></section>
 <section class="card"><h2>2. Crew & Hours</h2><div class="small">Add only the people who worked today.</div><div id="crew"></div><button type="button" class="secondary" id="addCrewButton">+ Add Crew Member</button></section>
 <section class="card"><h2>3. Today's Work</h2><label>Where did you work?</label><input name="locations" placeholder="Building / floor / room / area">
 <label>What did you accomplish?</label><textarea name="work" placeholder="Briefly describe today's work..."></textarea>
 <label>Materials installed / used</label><textarea name="materials" placeholder="Materials and quantities, if useful..."></textarea></section>
 <section class="card"><h2>4. Completion / Invoicing Status</h2>
-<label class="status"><input type="radio" name="completionStatus" value="ready_to_invoice">✓ Work Complete — Ready to Invoice</label>
+<label class="status"><input type="radio" name="completionStatus" value="ready_to_invoice" required>✓ Work Complete — Ready to Invoice</label>
 <label class="status"><input type="radio" name="completionStatus" value="not_complete">Work Not Complete</label>
 <label>Completion Notes</label><textarea name="completionNotes" placeholder="If not complete, what remains? If ready to invoice, add any useful final notes."></textarea></section>
 <section class="card"><h2>5. Photos</h2><div class="photo"><strong>Add job photos</strong><br><span class="small">Choose existing photos or take new photos.</span>
@@ -69,8 +69,10 @@ async function submitReport(e){
         const f=new FormData(document.getElementById("report"));
 
         const report={
-            work_order_number:f.get("workOrder")||null,
-            report_date:f.get("date")||null,
+        work_order_number:f.get("workOrder")||null,
+        project_name:f.get("project")||null,
+        report_date:f.get("date")||null,
+        foreman_name:null,
             foreman_name:null,
             job_for_assigned_by:f.get("jobFor")||null,
             locations:f.get("locations")||null,
