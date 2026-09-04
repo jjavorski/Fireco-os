@@ -313,17 +313,18 @@ function renderReports(){
 
 const text = [
   report.report_date,
-  formattedReportDate,,
-    report.work_order_number,
-    report.job_for_assigned_by,
-    crewText,
-    report.locations,
-    report.work_accomplished,
-    report.materials_used,
-    report.completion_status,
-    report.completion_notes,
-    report.tomorrow_plan
-  ]
+  formattedReportDate,
+  report.project_name,
+  report.work_order_number,
+  report.job_for_assigned_by,
+  crewText,
+  report.locations,
+  report.work_accomplished,
+  report.materials_used,
+  report.completion_status,
+  report.completion_notes,
+  report.tomorrow_plan
+]
   .join(" ")
   .toLowerCase();
 
@@ -412,11 +413,15 @@ const statusClass =
 
         <div class="detail">
 
-          <div>
-            <strong>Job For:</strong>
-            ${escapeHtml(report.job_for_assigned_by || "—")}
-          </div>
+  <div>
+    <strong>Project:</strong>
+    ${escapeHtml(report.project_name || "—")}
+  </div>
 
+  <div>
+    <strong>Job For:</strong>
+    ${escapeHtml(report.job_for_assigned_by || "—")}
+  </div>
           <div>
             <strong>Location:</strong>
             ${escapeHtml(report.locations || "—")}
