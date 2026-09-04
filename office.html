@@ -535,15 +535,28 @@ async function openReport(reportId){
       'box-shadow:0 10px 40px rgba(0,0,0,.3);' +
     '">' +
 
-      '<button type="button" id="closeReportViewer" style="' +
-        'float:right;' +
-        'border:0;' +
-        'background:#e8e8e8;' +
-        'padding:8px 14px;' +
-        'border-radius:8px;' +
-        'cursor:pointer;' +
-        'font-weight:700;' +
-      '">CLOSE</button>' +
+      '<div style="float:right;display:flex;gap:8px;">' +
+
+  '<button type="button" id="printReportViewer" style="' +
+    'border:0;' +
+    'background:#111;' +
+    'color:#fff;' +
+    'padding:8px 14px;' +
+    'border-radius:8px;' +
+    'cursor:pointer;' +
+    'font-weight:700;' +
+  '">PRINT / SAVE PDF</button>' +
+
+  '<button type="button" id="closeReportViewer" style="' +
+    'border:0;' +
+    'background:#e8e8e8;' +
+    'padding:8px 14px;' +
+    'border-radius:8px;' +
+    'cursor:pointer;' +
+    'font-weight:700;' +
+  '">CLOSE</button>' +
+
+'</div>' +
 
       '<h2 style="margin-top:0;">FDR-001 REPORT</h2>' +
 
@@ -608,7 +621,22 @@ async function openReport(reportId){
     '</div>';
 
   document.body.appendChild(viewer);
+document
+  .getElementById("printReportViewer")
+  .addEventListener("click", () => {
 
+    const reportWindow = window.open("", "_blank");
+
+    reportWindow.document.write(
+      "<html><head><title>FDR-001 Report</title></head><body>" +
+      viewer.querySelector("div").innerHTML +
+      "</body></html>"
+    );
+
+    reportWindow.document.close();
+    reportWindow.focus();
+    reportWindow.print();
+  });
   document
     .getElementById("closeReportViewer")
     .addEventListener("click", () => viewer.remove());
