@@ -211,11 +211,20 @@ button{
   <div class="stat-number" id="readyReports">0</div>
 </div>
 
-  <div class="stat">
-    <div class="stat-label">Not Complete</div>
-    <div class="stat-number" id="incompleteReports">0</div>
-  </div>
-
+ <div class="stat" id="incompleteFilter" style="cursor:pointer;">
+  <div class="stat-label">Not Complete</div>
+  <div class="stat-number" id="incompleteReports">0</div>
+</div>
+document
+  .getElementById("incompleteFilter")
+  .addEventListener(
+    "click",
+    () => {
+      const searchBox = document.getElementById("search");
+      searchBox.value = "not_complete";
+      renderReports();
+    }
+  );
   <div class="stat">
     <div class="stat-label">Regular Hours</div>
     <div class="stat-number" id="regularHours">0</div>
