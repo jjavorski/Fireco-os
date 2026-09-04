@@ -450,7 +450,7 @@ const statusClass =
 
   }).join("");
 }
-function openReport(reportId){
+async function openReport(reportId){
 
   const report =
     allReports.find(r => String(r.id) === String(reportId));
@@ -460,51 +460,152 @@ function openReport(reportId){
     return;
   }
 
-  let crewText = "No crew recorded.";
+  let crewHtml = "No crew recorded.";
 
   if(report.crew && report.crew.length > 0){
 
-    crewText = report.crew.map(person => {
+    crewHtml = report.crew.map(person => {
 
       return (
-        (person.employee_name || "Unnamed Employee") +
+        "<div>" +
+        escapeHtml(person.employee_name || "Unnamed Employee") +
         " — Regular: " +
         (person.regular_hours ?? 0) +
         " hrs, OT: " +
         (person.overtime_hours ?? 0) +
-        " hrs"
+        " hrs</div>"
       );
 
-    }).join("\n");
+    }).join("");
   }
 
-  alert(
-    "FDR-001 REPORT\n\n" +
+  let photosHtml = "<div>No photos attached.</div>";
 
-    "Date: " + formatDate(report.report_date) + "\n" +
-    "Job For: " + (report.job_for_assigned_by || "—") + "\n" +
-    "Work Order: " + (report.work_order_number || "—") + "\n\n" +
+  if(report.photos && report.photos.length > 0){
 
-    "CREW & HOURS:\n" +
-    crewText + "\n\n" +
+    const photoBlocks = [];
 
-    "Location: " + (report.locations || "—") + "\n\n" +
+    for(const photo of report.photos){
 
-    "Work Accomplished:\n" +
-    (report.work_accomplished || "—") + "\n\n" +
+      const {data, error} = await db.storage
+        .from("field-report-photos")
+        .createSignedUrl(photo.storage_path, 3600);
 
-    "Materials:\n" +
-    (report.materials_used || "—") + "\n\n" +
+      if(!error && data && data.signedUrl){
 
-    "Completion Status: " +
-    (report.completion_status || "—") + "\n\n" +
+        photoBlocks.push(
+          '<div style="margin-top:12px;">' +
+          '<img src="' + data.signedUrl + '" ' +
+          'style="width:100%;max-width:650px;border-radius:10px;border:1px solid #ddd;">' +
+          '</div>'
+        );
+      }
+    }
 
-    "Completion Notes:\n" +
-    (report.completion_notes || "—") + "\n\n" +
+    if(photoBlocks.length > 0){
+      photosHtml = photoBlocks.join("");
+    }
+  }
 
-    "Tomorrow:\n" +
-    (report.tomorrow_plan || "—")
-  );
+  const oldViewer = document.getElementById("reportViewer");
+
+  if(oldViewer){
+    oldViewer.remove();
+  }
+
+  const viewer = document.createElement("div");
+
+  viewer.id = "reportViewer";
+
+  viewer.style.cssText =
+    "position:fixed;" +
+    "inset:0;" +
+    "background:rgba(0,0,0,.65);" +
+    "z-index:9999;" +
+    "overflow:auto;" +
+    "padding:25px;";
+
+  viewer.innerHTML =
+    '<div style="' +
+      'background:#fff;' +
+      'max-width:760px;' +
+      'margin:20px auto;' +
+      'padding:24px;' +
+      'border-radius:14px;' +
+      'box-shadow:0 10px 40px rgba(0,0,0,.3);' +
+    '">' +
+
+      '<button type="button" id="closeReportViewer" style="' +
+        'float:right;' +
+        'border:0;' +
+        'background:#e8e8e8;' +
+        'padding:8px 14px;' +
+        'border-radius:8px;' +
+        'cursor:pointer;' +
+        'font-weight:700;' +
+      '">CLOSE</button>' +
+
+      '<h2 style="margin-top:0;">FDR-001 REPORT</h2>' +
+
+      '<p><strong>Date:</strong> ' +
+        escapeHtml(formatDate(report.report_date)) +
+      '</p>' +
+
+      '<p><strong>Job For:</strong> ' +
+        escapeHtml(report.job_for_assigned_by || "—") +
+      '</p>' +
+
+      '<p><strong>Work Order:</strong> ' +
+        escapeHtml(report.work_order_number || "—") +
+      '</p>' +
+
+      '<hr>' +
+
+      '<h3>Crew & Hours</h3>' +
+      crewHtml +
+
+      '<h3>Location</h3>' +
+      '<div style="white-space:pre-wrap;">' +
+        escapeHtml(report.locations || "—") +
+      '</div>' +
+
+      '<h3>Work Accomplished</h3>' +
+      '<div style="white-space:pre-wrap;">' +
+        escapeHtml(report.work_accomplished || "—") +
+      '</div>' +
+
+      '<h3>Materials</h3>' +
+      '<div style="white-space:pre-wrap;">' +
+        escapeHtml(report.materials_used || "—") +
+      '</div>' +
+
+      '<h3>Completion Status</h3>' +
+      '<div>' +
+        escapeHtml(report.completion_status || "—") +
+      '</div>' +
+
+      '<h3>Completion Notes</h3>' +
+      '<div style="white-space:pre-wrap;">' +
+        escapeHtml(report.completion_notes || "—") +
+      '</div>' +
+
+      '<h3>Tomorrow</h3>' +
+      '<div style="white-space:pre-wrap;">' +
+        escapeHtml(report.tomorrow_plan || "—") +
+      '</div>' +
+
+      '<hr>' +
+
+      '<h3>Job Photos</h3>' +
+      photosHtml +
+
+    '</div>';
+
+  document.body.appendChild(viewer);
+
+  document
+    .getElementById("closeReportViewer")
+    .addEventListener("click", () => viewer.remove());
 }
 window.openReport = openReport;  
 async function loadReports(){
