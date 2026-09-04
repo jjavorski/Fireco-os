@@ -545,7 +545,20 @@ if(reportIds.length > 0){
       crew => String(crew.field_report_id) === String(report.id)
     );
   });
+const {data: photoData, error: photoError} = await db
+  .from("field_report_photos")
+  .select("*")
+  .in("field_report_id", reportIds);
 
+if(photoError){
+  throw photoError;
+}
+
+allReports.forEach(report => {
+  report.photos = photoData.filter(
+    photo => String(photo.field_report_id) === String(report.id)
+  );
+});
 }else{
 
   allReports = [];
