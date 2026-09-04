@@ -116,7 +116,35 @@ if(crew.length > 0){
         }
     }
 }
+const photoInput = document.getElementById("photos");
+const photoFiles = photoInput ? Array.from(photoInput.files || []) : [];
 
+if(photoFiles.length > 0){
+
+    for(let i = 0; i < photoFiles.length; i++){
+
+        const file = photoFiles[i];
+
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+        const storagePath =
+            savedReport.id + "/" +
+            Date.now() + "-" +
+            i + "-" +
+            safeName;
+
+        const {error: photoUploadError} = await db.storage
+            .from("field-report-photos")
+            .upload(storagePath, file, {
+                contentType: file.type,
+                upsert: false
+            });
+
+        if(photoUploadError){
+            throw photoUploadError;
+        }
+    }
+}
         localStorage.setItem(
             "fireco_fdr001_last",
             JSON.stringify({
