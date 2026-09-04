@@ -207,10 +207,10 @@ button{
     <div class="stat-number" id="totalReports">0</div>
   </div>
 
-  <div class="stat">
-    <div class="stat-label">Ready to Invoice</div>
-    <div class="stat-number" id="readyReports">0</div>
-  </div>
+ <div class="stat" id="readyFilter" style="cursor:pointer;">
+  <div class="stat-label">Ready to Invoice</div>
+  <div class="stat-number" id="readyReports">0</div>
+</div>
 
   <div class="stat">
     <div class="stat-label">Not Complete</div>
@@ -738,7 +738,16 @@ document.addEventListener(
         "input",
         renderReports
       );
-
+document
+  .getElementById("readyFilter")
+  .addEventListener(
+    "click",
+    () => {
+      const searchBox = document.getElementById("search");
+      searchBox.value = "ready_to_invoice";
+      renderReports();
+    }
+  );
     document
       .getElementById("refreshButton")
       .addEventListener(
