@@ -566,7 +566,9 @@ async function openReport(reportId){
       '<p><strong>Job For:</strong> ' +
         escapeHtml(report.job_for_assigned_by || "—") +
       '</p>' +
-
+      '<p><strong>Project:</strong> ' +
+        escapeHtml(report.project_name || "—") +
+      '</p>' +
       '<p><strong>Work Order:</strong> ' +
         escapeHtml(report.work_order_number || "—") +
       '</p>' +
