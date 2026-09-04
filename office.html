@@ -201,11 +201,10 @@ button{
 
   <div id="errorBox"></div>
 
-  <section class="stats">
-  <div class="stat">
-    <div class="stat-label">Total Reports</div>
-    <div class="stat-number" id="totalReports">0</div>
-  </div>
+  <div class="stat" id="allReportsFilter" style="cursor:pointer;">
+  <div class="stat-label">Total Reports</div>
+  <div class="stat-number" id="totalReports">0</div>
+</div>
 
  <div class="stat" id="readyFilter" style="cursor:pointer;">
   <div class="stat-label">Ready to Invoice</div>
@@ -745,6 +744,16 @@ document
     () => {
       const searchBox = document.getElementById("search");
       searchBox.value = "ready_to_invoice";
+      renderReports();
+    }
+  );
+    document
+  .getElementById("allReportsFilter")
+  .addEventListener(
+    "click",
+    () => {
+      const searchBox = document.getElementById("search");
+      searchBox.value = "";
       renderReports();
     }
   );
