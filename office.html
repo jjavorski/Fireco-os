@@ -663,8 +663,10 @@ async function loadReports(){
   document.getElementById("reports").innerHTML =
     '<div class="empty">Loading field reports...</div>';
 
-  document.getElementById("errorBox").innerHTML = "";
-
+ const errorBox = document.getElementById("errorBox");
+if(errorBox){
+  errorBox.innerHTML = "";
+}
   try{
 
     const {data,error} =
