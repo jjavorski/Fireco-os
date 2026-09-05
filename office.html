@@ -199,31 +199,31 @@ button{
 
 <div class="container">
 
-  <div id="errorBox"></div>
+  <div "errorBox"></div>
 
-  <div class="stat" id="allReportsFilter" style="cursor:pointer;">
+  <div class="stat" "allReportsFilter" style="cursor:pointer;">
   <div class="stat-label">Total Reports</div>
-  <div class="stat-number" id="totalReports">0</div>
+  <div class="stat-number" "totalReports">0</div>
 </div>
 
- <div class="stat" id="readyFilter" style="cursor:pointer;">
+ <div class="stat" "readyFilter" style="cursor:pointer;">
   <div class="stat-label">Ready to Invoice</div>
-  <div class="stat-number" id="readyReports">0</div>
+  <div class="stat-number" "readyReports">0</div>
 </div>
 
- <div class="stat" id="incompleteFilter" style="cursor:pointer;">
+ <div class="stat" "incompleteFilter" style="cursor:pointer;">
   <div class="stat-label">Not Complete</div>
-  <div class="stat-number" id="incompleteReports">0</div>
+  <div class="stat-number" "incompleteReports">0</div>
 </div>
 
   <div class="stat">
     <div class="stat-label">Regular Hours</div>
-    <div class="stat-number" id="regularHours">0</div>
+    <div class="stat-number" "regularHours">0</div>
   </div>
 
   <div class="stat">
     <div class="stat-label">Overtime Hours</div>
-    <div class="stat-number" id="overtimeHours">0</div>
+    <div class="stat-number" "overtimeHours">0</div>
   </div>
 </section>
   <section class="card">
@@ -232,20 +232,24 @@ button{
 
   <div class="toolbar">
   <input
-    id="search"
+    "search"
     type="text"
     placeholder="Search reports..."
   >
 
-  <select id="employeeFilter">
+  <select "employeeFilter">
     <option value="">All Employees</option>
   </select>
 
-  <button id="refreshButton">
+  <button "refreshButton">
     Refresh
   </button>
 </div>
-
+<div id="reports">
+  <div class="empty">
+    Loading field reports...
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -551,7 +555,7 @@ async function openReport(reportId){
 
       '<div style="float:right;display:flex;gap:8px;">' +
 
-  '<button type="button" id="printReportViewer" style="' +
+  '<button type="button" "printReportViewer" style="' +
     'border:0;' +
     'background:#111;' +
     'color:#fff;' +
@@ -561,7 +565,7 @@ async function openReport(reportId){
     'font-weight:700;' +
   '">PRINT / SAVE PDF</button>' +
 
-  '<button type="button" id="closeReportViewer" style="' +
+  '<button type="button" "closeReportViewer" style="' +
     'border:0;' +
     'background:#e8e8e8;' +
     'padding:8px 14px;' +
