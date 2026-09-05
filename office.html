@@ -356,28 +356,37 @@ document.getElementById("incompleteReports").textContent =
     return status === "not_complete" || status === "not complete";
   }).length;
   let totalRegularHours = 0;
-  let totalOvertimeHours = 0;
+let totalOvertimeHours = 0;
 
-  filtered.forEach(report => {
+filtered.forEach(report => {
 
-    if(report.crew && report.crew.length > 0){
+  (report.crew || []).forEach(person => {
 
-      report.crew.forEach(person => {
+    const personName =
+      String(person.employee_name || "")
+        .trim()
+        .toLowerCase();
 
-        totalRegularHours += Number(person.regular_hours || 0);
-        totalOvertimeHours += Number(person.overtime_hours || 0);
+    if(
+      selectedEmployee === "" ||
+      personName === selectedEmployee
+    ){
+      totalRegularHours +=
+        Number(person.regular_hours || 0);
 
-      });
-
+      totalOvertimeHours +=
+        Number(person.overtime_hours || 0);
     }
 
   });
 
-  document.getElementById("regularHours").textContent =
-    totalRegularHours;
+});
 
-  document.getElementById("overtimeHours").textContent =
-    totalOvertimeHours;
+document.getElementById("regularHours").textContent =
+  totalRegularHours;
+
+document.getElementById("overtimeHours").textContent =
+  totalOvertimeHours;
   if(!filtered.length){
 
     box.innerHTML =
