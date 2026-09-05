@@ -230,26 +230,20 @@ button{
 
     <h2>Field Reports</h2>
 
-    <div class="toolbar">
-      <input
-        id="search"
-        type="text"
-        placeholder="Search reports..."
-      >
+  <div class="toolbar">
+  <input
+    id="search"
+    type="text"
+    placeholder="Search reports..."
+  >
 
-      <button id="refreshButton">
-        Refresh
-      </button>
-    </div>
+  <select id="employeeFilter">
+    <option value="">All Employees</option>
+  </select>
 
-    <div id="reports">
-      <div class="empty">
-        Loading field reports...
-      </div>
-    </div>
-
-  </section>
-
+  <button id="refreshButton">
+    Refresh
+  </button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -302,7 +296,10 @@ function renderReports(){
     document.getElementById("search").value
       .trim()
       .toLowerCase();
-
+const selectedEmployee =
+  document.getElementById("employeeFilter").value
+    .trim()
+    .toLowerCase();
   const filtered = allReports.filter(report => {
 
   const crewText = (report.crew || [])
@@ -328,7 +325,17 @@ const text = [
   .join(" ")
   .toLowerCase();
 
-  return text.includes(search);
+  const matchesSearch = text.includes(search);
+
+const matchesEmployee =
+  selectedEmployee === "" ||
+  (report.crew || []).some(person =>
+    String(person.employee_name || "")
+      .trim()
+      .toLowerCase() === selectedEmployee
+  );
+
+return matchesSearch && matchesEmployee;
 });
 
   document.getElementById("totalReports").textContent =
@@ -689,7 +696,41 @@ if(reportIds.length > 0){
       crew => String(crew.field_report_id) === String(report.id)
     );
   });
-const {data: photoData, error: photoError} = await db
+const employeeFilter = document.getElementById("employeeFilter");
+
+if(employeeFilter){
+
+  const employeeNames = [];
+
+  allReports.forEach(report => {
+
+    (report.crew || []).forEach(person => {
+
+      const name = String(person.employee_name || "").trim();
+
+      if(name && !employeeNames.includes(name)){
+        employeeNames.push(name);
+      }
+
+    });
+
+  });
+
+  employeeNames.sort();
+
+  employeeFilter.innerHTML =
+    '<option value="">All Employees</option>' +
+    employeeNames
+      .map(name =>
+        '<option value="' +
+        escapeHtml(name) +
+        '">' +
+        escapeHtml(name) +
+        '</option>'
+      )
+      .join("");
+}
+  const {data: photoData, error: photoError} = await db
   .from("field_report_photos")
   .select("*")
   .in("field_report_id", reportIds);
@@ -748,6 +789,12 @@ document.addEventListener(
         renderReports
       );
 document
+  .getElementById("employeeFilter")
+  .addEventListener(
+    "change",
+    renderReports
+  );
+    document
   .getElementById("readyFilter")
   .addEventListener(
     "click",
