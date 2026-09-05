@@ -653,7 +653,19 @@ document
     reportWindow.focus();
     reportWindow.print();
   });
-  
+  document
+  .getElementById("closeReportViewer")
+  .addEventListener("click", () => viewer.remove());
+}
+
+window.openReport = openReport;
+
+async function loadReports(){
+
+  document.getElementById("reports").innerHTML =
+    '<div class="empty">Loading field reports...</div>';
+
+  try{
     const {data,error} =
       await db
         .from("field_reports")
