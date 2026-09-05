@@ -250,7 +250,21 @@ button{
     id="dateTo"
     type="date"
   >
+<button type="button" id="todayButton">
+  Today
+</button>
 
+<button type="button" id="thisWeekButton">
+  This Week
+</button>
+
+<button type="button" id="lastWeekButton">
+  Last Week
+</button>
+
+<button type="button" id="thisMonthButton">
+  This Month
+</button>
   <button id="refreshButton">
     Refresh
   </button>
@@ -850,6 +864,124 @@ document
   .addEventListener(
     "change",
     renderReports
+  );
+  document
+  .getElementById("todayButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      const today =
+        new Date().toISOString().split("T")[0];
+
+      document.getElementById("dateFrom").value = today;
+      document.getElementById("dateTo").value = today;
+
+      renderReports();
+    }
+  );
+   document
+  .getElementById("thisWeekButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      const today = new Date();
+
+      const day = today.getDay();
+      const diffToMonday =
+        day === 0 ? -6 : 1 - day;
+
+      const monday = new Date(today);
+      monday.setDate(today.getDate() + diffToMonday);
+
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+
+      const formatDateInput = date =>
+        date.getFullYear() + "-" +
+        String(date.getMonth() + 1).padStart(2, "0") + "-" +
+        String(date.getDate()).padStart(2, "0");
+
+      document.getElementById("dateFrom").value =
+        formatDateInput(monday);
+
+      document.getElementById("dateTo").value =
+        formatDateInput(sunday);
+
+      renderReports();
+    }
+  );
+   document
+  .getElementById("lastWeekButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      const today = new Date();
+
+      const day = today.getDay();
+      const diffToMonday =
+        day === 0 ? -6 : 1 - day;
+
+      const thisMonday = new Date(today);
+      thisMonday.setDate(today.getDate() + diffToMonday);
+
+      const lastMonday = new Date(thisMonday);
+      lastMonday.setDate(thisMonday.getDate() - 7);
+
+      const lastSunday = new Date(lastMonday);
+      lastSunday.setDate(lastMonday.getDate() + 6);
+
+      const formatDateInput = date =>
+        date.getFullYear() + "-" +
+        String(date.getMonth() + 1).padStart(2, "0") + "-" +
+        String(date.getDate()).padStart(2, "0");
+
+      document.getElementById("dateFrom").value =
+        formatDateInput(lastMonday);
+
+      document.getElementById("dateTo").value =
+        formatDateInput(lastSunday);
+
+      renderReports();
+    }
+  );
+    document
+  .getElementById("thisMonthButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      const today = new Date();
+
+      const firstDay =
+        new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          1
+        );
+
+      const lastDay =
+        new Date(
+          today.getFullYear(),
+          today.getMonth() + 1,
+          0
+        );
+
+      const formatDateInput = date =>
+        date.getFullYear() + "-" +
+        String(date.getMonth() + 1).padStart(2, "0") + "-" +
+        String(date.getDate()).padStart(2, "0");
+
+      document.getElementById("dateFrom").value =
+        formatDateInput(firstDay);
+
+      document.getElementById("dateTo").value =
+        formatDateInput(lastDay);
+
+      renderReports();
+    }
   );
     document
   .getElementById("readyFilter")
