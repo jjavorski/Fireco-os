@@ -229,20 +229,32 @@ button{
 
     <h2>Field Reports</h2>
 
-  <div class="toolbar">
-  <input
-  id="search"
-  type="text"
-  placeholder="Search reports..."
->
+<div class="toolbar">
 
- <select id="employeeFilter">
+  <input
+    id="search"
+    type="text"
+    placeholder="Search reports..."
+  >
+
+  <select id="employeeFilter">
     <option value="">All Employees</option>
   </select>
 
+  <input
+    id="dateFrom"
+    type="date"
+  >
+
+  <input
+    id="dateTo"
+    type="date"
+  >
+
   <button id="refreshButton">
-  Refresh
-</button>
+    Refresh
+  </button>
+
 </div>
 <div id="reports">
   <div class="empty">
@@ -303,6 +315,11 @@ const selectedEmployee =
   document.getElementById("employeeFilter").value
     .trim()
     .toLowerCase();
+  const dateFrom =
+  document.getElementById("dateFrom").value;
+
+const dateTo =
+  document.getElementById("dateTo").value;
   const filtered = allReports.filter(report => {
 
   const crewText = (report.crew || [])
@@ -328,7 +345,7 @@ const text = [
   .join(" ")
   .toLowerCase();
 
-  const matchesSearch = text.includes(search);
+const matchesSearch = text.includes(search);
 
 const matchesEmployee =
   selectedEmployee === "" ||
@@ -338,7 +355,23 @@ const matchesEmployee =
       .toLowerCase() === selectedEmployee
   );
 
-return matchesSearch && matchesEmployee;
+const reportDate =
+  String(report.report_date || "").substring(0, 10);
+
+const matchesDateFrom =
+  dateFrom === "" ||
+  reportDate >= dateFrom;
+
+const matchesDateTo =
+  dateTo === "" ||
+  reportDate <= dateTo;
+
+return (
+  matchesSearch &&
+  matchesEmployee &&
+  matchesDateFrom &&
+  matchesDateTo
+);
 });
 
   document.getElementById("totalReports").textContent =
@@ -801,6 +834,19 @@ document.addEventListener(
       );
 document
   .getElementById("employeeFilter")
+  .addEventListener(
+    "change",
+    renderReports
+  );
+  document
+  .getElementById("dateFrom")
+  .addEventListener(
+    "change",
+    renderReports
+  );
+
+document
+  .getElementById("dateTo")
   .addEventListener(
     "change",
     renderReports
