@@ -348,7 +348,7 @@ document.getElementById("incompleteReports").textContent =
   let totalRegularHours = 0;
   let totalOvertimeHours = 0;
 
-  allReports.forEach(report => {
+  filtered.forEach(report => {
 
     if(report.crew && report.crew.length > 0){
 
