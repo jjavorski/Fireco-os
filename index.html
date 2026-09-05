@@ -33,7 +33,18 @@ button{width:100%;border:0;border-radius:12px;padding:15px;font-size:17px;font-w
 <section class="card"><h2>6. Tomorrow</h2><textarea name="tomorrow" placeholder="What needs to happen next?"></textarea></section>
 <section class="card"><h2>7. Sign & Submit</h2><label>Foreman Signature</label><canvas id="sig"></canvas>
 <button type="button" class="secondary" id="clearSigButton">Clear Signature</button>
-<button type="submit" class="primary" style="margin-top:12px" id="submitButton">SUBMIT DAILY REPORT</button><div id="ok" class="ok"></div></section>
+<button type="submit" class="primary" style="margin-top:12px" id="submitButton">SUBMIT DAILY REPORT</button>
+
+<button
+  type="button"
+  class="secondary"
+  id="anotherWorkOrderButton"
+  style="margin-top:12px;display:none;"
+>
+  START ANOTHER WORK ORDER
+</button>
+
+<div id="ok" class="ok"></div>
 </form><footer>Fireco OS • FDR-001 • Rev 3.0</footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -46,7 +57,44 @@ function msg(t,c){const x=document.getElementById("ok");x.textContent=t;x.classN
 function addCrew(){if(crewCount>=6){alert("Maximum of 6 crew members.");return}crewCount++;const r=document.createElement("div");r.className="crew";r.innerHTML='<div class="crewgrid"><input type="text" name="crew_'+crewCount+'_name" placeholder="Employee Name"><input type="number" name="crew_'+crewCount+'_regular" placeholder="Regular Hours" min="0" step="0.25"><input type="number" name="crew_'+crewCount+'_overtime" placeholder="OT Hours" min="0" step="0.25"></div>';document.getElementById("crew").appendChild(r)}
 window.addCrew=addCrew;
 function clearSig(){const c=document.getElementById("sig");c.getContext("2d").clearRect(0,0,c.width,c.height)}window.clearSig=clearSig;
+function clearSig(){const c=document.getElementById("sig");c.getContext("2d").clearRect(0,0,c.width,c.height)}
+window.clearSig=clearSig;
+  function startAnotherWorkOrder(){
 
+  const form = document.getElementById("report");
+  const savedDate = document.getElementById("date").value;
+
+  form.reset();
+
+  document.getElementById("date").value = savedDate;
+
+  document.getElementById("crew").innerHTML = "";
+  crewCount = 0;
+
+  const photoInput = document.getElementById("photos");
+  if(photoInput){
+    photoInput.value = "";
+  }
+
+  clearSig();
+
+  const submitButton = document.getElementById("submitButton");
+  submitButton.disabled = false;
+  submitButton.textContent = "SUBMIT DAILY REPORT";
+
+  document.getElementById("anotherWorkOrderButton").style.display = "none";
+
+  const ok = document.getElementById("ok");
+  ok.style.display = "none";
+  ok.textContent = "";
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+window.startAnotherWorkOrder = startAnotherWorkOrder;  
 function setupSig(){const c=document.getElementById("sig"),x=c.getContext("2d");let d=false;function size(){const r=c.getBoundingClientRect(),q=devicePixelRatio||1;c.width=r.width*q;c.height=r.height*q;x.setTransform(q,0,0,q,0,0);x.lineWidth=2;x.lineCap="round"}size();addEventListener("resize",size);function p(e){const r=c.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}c.addEventListener("pointerdown",e=>{d=true;c.setPointerCapture(e.pointerId);const a=p(e);x.beginPath();x.moveTo(a.x,a.y)});c.addEventListener("pointermove",e=>{if(!d)return;const a=p(e);x.lineTo(a.x,a.y);x.stroke()});c.addEventListener("pointerup",()=>d=false);c.addEventListener("pointercancel",()=>d=false)}
 function collectCrew(){const a=[];for(let i=1;i<=crewCount;i++)a.push({name:document.querySelector('[name="crew_'+i+'_name"]').value,regular:document.querySelector('[name="crew_'+i+'_regular"]').value,overtime:document.querySelector('[name="crew_'+i+'_overtime"]').value});return a}
 
@@ -178,7 +226,7 @@ if(photoRecordError){
         );
 
         b.textContent="SUBMITTED ✓";
-
+document.getElementById("anotherWorkOrderButton").style.display = "block";
     }catch(err){
 
         console.error("FDR-001 submission failed:",err);
@@ -194,5 +242,59 @@ if(photoRecordError){
     }
 }
 
-document.addEventListener("DOMContentLoaded",()=>{const d=document.getElementById("date");if(d&&!d.value)d.valueAsDate=new Date();document.getElementById("addCrewButton").addEventListener("click",addCrew);document.getElementById("clearSigButton").addEventListener("click",clearSig);document.getElementById("report").addEventListener("submit",submitReport);setupSig();try{if(window.supabase&&typeof window.supabase.createClient==="function"){db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);console.log("Supabase connected.")}else console.warn("Supabase library unavailable.")}catch(e){console.error("Supabase initialization failed:",e)}});
+document.addEventListener("DOMContentLoaded", () => {
+
+  const d = document.getElementById("date");
+
+  if(d && !d.value){
+    d.valueAsDate = new Date();
+  }
+
+  document
+    .getElementById("addCrewButton")
+    .addEventListener("click", addCrew);
+
+  document
+    .getElementById("clearSigButton")
+    .addEventListener("click", clearSig);
+
+  document
+    .getElementById("report")
+    .addEventListener("submit", submitReport);
+
+  document
+    .getElementById("anotherWorkOrderButton")
+    .addEventListener("click", startAnotherWorkOrder);
+
+  setupSig();
+
+  try{
+
+    if(
+      window.supabase &&
+      typeof window.supabase.createClient === "function"
+    ){
+      db = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+      console.log("Supabase connected.");
+
+    }else{
+
+      console.warn("Supabase library unavailable.");
+
+    }
+
+  }catch(e){
+
+    console.error(
+      "Supabase initialization failed:",
+      e
+    );
+
+  }
+
+});
 </script></body></html>
