@@ -737,7 +737,10 @@ async function loadReports(){
 
     if(error) throw error;
 
-    allReports = data || [];
+    allReports =
+  (data || []).filter(
+    report => report.archived !== true
+  );
 
 const reportIds = allReports.map(report => report.id);
 
