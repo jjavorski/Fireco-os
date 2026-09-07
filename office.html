@@ -265,6 +265,9 @@ button{
 <button type="button" id="thisMonthButton">
   This Month
 </button>
+  <button type="button" id="clearFiltersButton">
+  Clear Filters
+</button>
   <button id="refreshButton">
     Refresh
   </button>
@@ -980,10 +983,26 @@ document
       document.getElementById("dateTo").value =
         formatDateInput(lastDay);
 
+           renderReports();
+    }
+  );
+
+document
+  .getElementById("clearFiltersButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      document.getElementById("search").value = "";
+      document.getElementById("employeeFilter").value = "";
+      document.getElementById("dateFrom").value = "";
+      document.getElementById("dateTo").value = "";
+
       renderReports();
     }
   );
-    document
+
+document
   .getElementById("readyFilter")
   .addEventListener(
     "click",
