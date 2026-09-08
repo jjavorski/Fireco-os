@@ -621,7 +621,16 @@ async function openReport(reportId){
     'border-radius:8px;' +
     'cursor:pointer;' +
     'font-weight:700;' +
-  '">PRINT / SAVE PDF</button>' +
+   '">PRINT / SAVE PDF</button>' +
+
+  '<button type="button" id="archiveReportViewer" style="' +
+    'border:0;' +
+    'background:#e8e8e8;' +
+    'padding:8px 14px;' +
+    'border-radius:8px;' +
+    'cursor:pointer;' +
+    'font-weight:700;' +
+  '">ARCHIVE REPORT</button>' +
 
   '<button type="button" id="closeReportViewer" style="' +
     'border:0;' +
@@ -1041,6 +1050,15 @@ document
         "click",
         loadReports
       );
+
+    const {
+      data: { session }
+    } = await db.auth.getSession();
+
+    if(!session){
+      window.location.href = "login.html";
+      return;
+    }
 
     await loadReports();
   }
