@@ -722,11 +722,46 @@ document
 
     reportWindow.document.close();
     reportWindow.focus();
-    reportWindow.print();
+       reportWindow.print();
   });
-  document
+
+document
+  .getElementById("archiveReportViewer")
+  .addEventListener(
+    "click",
+    async () => {
+
+      const confirmed = window.confirm(
+        "Archive this report? It will be removed from the normal Office Dashboard."
+      );
+
+      if(!confirmed){
+        return;
+      }
+
+      const { error } = await db
+        .from("field_reports")
+        .update({ archived: true })
+        .eq("id", report.id);
+
+      if(error){
+        alert(
+          "Could not archive this report: " +
+          error.message
+        );
+        return;
+      }
+
+      viewer.remove();
+
+      await loadReports();
+
+      alert("Report archived successfully.");
+    }
+  );
+
+document
   .getElementById("closeReportViewer")
-  .addEventListener("click", () => viewer.remove());
 }
 
 window.openReport = openReport;
