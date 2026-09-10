@@ -767,7 +767,10 @@ document
 
 document
   .getElementById("closeReportViewer")
-}
+  .addEventListener(
+    "click",
+    () => viewer.remove()
+  );
 
 window.openReport = openReport;
 
