@@ -637,7 +637,18 @@ async function openReport(reportId){
     'font-weight:700;' +
     '">' +
     (showingArchived ? "RESTORE REPORT" : "ARCHIVE REPORT") +
-  '</button>' +
+    '</button>' +
+
+  (showingArchived
+    ? '<button type="button" id="deleteReportViewer" style="' +
+        'border:0;' +
+        'background:#e8e8e8;' +
+        'padding:8px 14px;' +
+        'border-radius:8px;' +
+        'cursor:pointer;' +
+        'font-weight:700;' +
+      '">PERMANENT DELETE</button>'
+    : '') +
 
   '<button type="button" id="closeReportViewer" style="' +
     'border:0;' +
@@ -779,7 +790,93 @@ document
       );
     }
   );
-document
+if(showingArchived){
+
+  document
+    .getElementById("deleteReportViewer")
+    .addEventListener(
+      "click",
+      async () => {
+
+        const confirmed = window.confirm(
+          "Permanently delete this report? This cannot be undone."
+        );
+
+        if(!confirmed){
+          return;
+        }
+
+        const photoPaths =
+          (report.photos || [])
+            .map(photo => photo.storage_path)
+            .filter(Boolean);
+
+        const { error: deleteError } =
+  await db
+    .from("field_reports")
+    .delete()
+    .eq("id", report.id);
+
+if(deleteError){
+  alert(
+    "Could not permanently delete this report: " +
+    deleteError.message
+  );
+  return;
+}
+
+if(photoPaths.length > 0){
+
+  const { error: storageError } =
+    await db.storage
+      .from("field-report-photos")
+      .remove(photoPaths);
+
+  if(storageError){
+    alert(
+      "Report was deleted, but its stored photo files could not be cleaned up: " +
+      storageError.message
+    );
+  }
+}
+        }
+
+        const { error: deleteError } =
+          await db
+            .from("field_reports")
+            .delete()
+            .eq("id", report.id);
+
+        if(deleteError){
+          alert(
+            "Could not permanently delete this report: " +
+            deleteError.message
+          );
+          return;
+        }
+if(photoPaths.length > 0){
+
+  const { error: storageError } =
+    await db.storage
+      .from("field-report-photos")
+      .remove(photoPaths);
+
+  if(storageError){
+    alert(
+      "Report was deleted, but its stored photo files could not be cleaned up: " +
+      storageError.message
+    );
+  }
+}
+        viewer.remove();
+
+        await loadReports();
+
+        alert("Report permanently deleted.");
+      }
+    );
+}
+  document
   .getElementById("closeReportViewer")
   .addEventListener(
     "click",
