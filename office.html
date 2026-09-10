@@ -265,12 +265,17 @@ button{
 <button type="button" id="thisMonthButton">
   This Month
 </button>
-  <button type="button" id="clearFiltersButton">
+<button type="button" id="clearFiltersButton">
   Clear Filters
 </button>
-  <button id="refreshButton">
-    Refresh
-  </button>
+
+<button type="button" id="archivedReportsButton">
+  Archived Reports
+</button>
+
+<button id="refreshButton">
+  Refresh
+</button>
 
 </div>
 <div id="reports">
@@ -292,7 +297,7 @@ const SUPABASE_KEY =
 
 let db = null;
 let allReports = [];
-
+let showingArchived = false;
 function escapeHtml(value){
   if(value === null || value === undefined) return "";
 
@@ -783,7 +788,10 @@ async function loadReports(){
 
     allReports =
   (data || []).filter(
-    report => report.archived !== true
+    report =>
+      showingArchived
+        ? report.archived === true
+        : report.archived !== true
   );
 
 const reportIds = allReports.map(report => report.id);
@@ -1049,6 +1057,23 @@ document
     }
   );
 
+
+    document
+  .getElementById("archivedReportsButton")
+  .addEventListener(
+    "click",
+    async () => {
+
+      showingArchived = !showingArchived;
+
+      document.getElementById("archivedReportsButton").textContent =
+        showingArchived
+          ? "Back to Active Reports"
+          : "Archived Reports";
+
+      await loadReports();
+    }
+  );
 document
   .getElementById("readyFilter")
   .addEventListener(
