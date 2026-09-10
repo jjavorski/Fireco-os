@@ -812,36 +812,6 @@ if(showingArchived){
             .filter(Boolean);
 
         const { error: deleteError } =
-  await db
-    .from("field_reports")
-    .delete()
-    .eq("id", report.id);
-
-if(deleteError){
-  alert(
-    "Could not permanently delete this report: " +
-    deleteError.message
-  );
-  return;
-}
-
-if(photoPaths.length > 0){
-
-  const { error: storageError } =
-    await db.storage
-      .from("field-report-photos")
-      .remove(photoPaths);
-
-  if(storageError){
-    alert(
-      "Report was deleted, but its stored photo files could not be cleaned up: " +
-      storageError.message
-    );
-  }
-}
-        }
-
-        const { error: deleteError } =
           await db
             .from("field_reports")
             .delete()
@@ -854,20 +824,22 @@ if(photoPaths.length > 0){
           );
           return;
         }
-if(photoPaths.length > 0){
 
-  const { error: storageError } =
-    await db.storage
-      .from("field-report-photos")
-      .remove(photoPaths);
+        if(photoPaths.length > 0){
 
-  if(storageError){
-    alert(
-      "Report was deleted, but its stored photo files could not be cleaned up: " +
-      storageError.message
-    );
-  }
-}
+          const { error: storageError } =
+            await db.storage
+              .from("field-report-photos")
+              .remove(photoPaths);
+
+          if(storageError){
+            alert(
+              "Report was deleted, but its stored photo files could not be cleaned up: " +
+              storageError.message
+            );
+          }
+        }
+
         viewer.remove();
 
         await loadReports();
