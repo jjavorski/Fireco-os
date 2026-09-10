@@ -635,7 +635,9 @@ async function openReport(reportId){
     'border-radius:8px;' +
     'cursor:pointer;' +
     'font-weight:700;' +
-  '">ARCHIVE REPORT</button>' +
+    '">' +
+    (showingArchived ? "RESTORE REPORT" : "ARCHIVE REPORT") +
+  '</button>' +
 
   '<button type="button" id="closeReportViewer" style="' +
     'border:0;' +
@@ -736,8 +738,13 @@ document
     "click",
     async () => {
 
+      const actionText =
+        showingArchived ? "Restore" : "Archive";
+
       const confirmed = window.confirm(
-        "Archive this report? It will be removed from the normal Office Dashboard."
+        showingArchived
+          ? "Restore this report? It will return to the normal Office Dashboard."
+          : "Archive this report? It will be removed from the normal Office Dashboard."
       );
 
       if(!confirmed){
@@ -746,12 +753,16 @@ document
 
       const { error } = await db
         .from("field_reports")
-        .update({ archived: true })
+        .update({
+          archived: showingArchived ? false : true
+        })
         .eq("id", report.id);
 
       if(error){
         alert(
-          "Could not archive this report: " +
+          "Could not " +
+          actionText.toLowerCase() +
+          " this report: " +
           error.message
         );
         return;
@@ -761,10 +772,13 @@ document
 
       await loadReports();
 
-      alert("Report archived successfully.");
+      alert(
+        showingArchived
+          ? "Report restored successfully."
+          : "Report archived successfully."
+      );
     }
   );
-
 document
   .getElementById("closeReportViewer")
   .addEventListener(
