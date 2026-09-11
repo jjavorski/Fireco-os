@@ -116,26 +116,30 @@ async function submitReport(e){
 
         const f=new FormData(document.getElementById("report"));
 
-        const report={
-        work_order_number:f.get("workOrder")||null,
-        project_name:f.get("project")||null,
-        report_date:f.get("date")||null,
-        foreman_name:null,
-            foreman_name:null,
-            job_for_assigned_by:f.get("jobFor")||null,
-            locations:f.get("locations")||null,
-            work_accomplished:f.get("work")||null,
-            materials_used:f.get("materials")||null,
-            completion_status:f.get("completionStatus")||null,
-            completion_notes:f.get("completionNotes")||null,
-            tomorrow_plan:f.get("tomorrow")||null
-        };
+       const reportId = crypto.randomUUID();
 
-        const {data: savedReport, error: reportError} = await db
+const report={
+    id: reportId,
+    work_order_number:f.get("workOrder")||null,
+    project_name:f.get("project")||null,
+    report_date:f.get("date")||null,
+    foreman_name:null,
+    job_for_assigned_by:f.get("jobFor")||null,
+    locations:f.get("locations")||null,
+    work_accomplished:f.get("work")||null,
+    materials_used:f.get("materials")||null,
+    completion_status:f.get("completionStatus")||null,
+    completion_notes:f.get("completionNotes")||null,
+    tomorrow_plan:f.get("tomorrow")||null
+};
+
+const {error: reportError} = await db
     .from("field_reports")
-    .insert(report)
-    .select("id")
-    .single();
+    .insert(report);
+
+const savedReport = {
+    id: reportId
+};
 
 if(reportError){
     throw reportError;
