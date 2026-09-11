@@ -276,7 +276,9 @@ button{
 <button id="refreshButton">
   Refresh
 </button>
-
+<button type="button" id="logoutButton">
+  Logout
+</button>
 </div>
 <div id="reports">
   <div class="empty">
@@ -1196,7 +1198,15 @@ document
         "click",
         loadReports
       );
-
+document
+  .getElementById("logoutButton")
+  .addEventListener(
+    "click",
+    async () => {
+      await db.auth.signOut();
+      window.location.href = "login.html";
+    }
+  );
     const {
       data: { session }
     } = await db.auth.getSession();
