@@ -52,7 +52,22 @@ button{width:100%;border:0;border-radius:12px;padding:15px;font-size:17px;font-w
 const SUPABASE_URL="https://ovpqmzxlikrhzxajtday.supabase.co";
 const SUPABASE_KEY="sb_publishable_wodv28HysVdcm5QTmiDIHw_99b0FbMF";
 let db=null,crewCount=0;
+let employeeList=[];
+async function loadEmployees(){
+  const {data,error} = await db
+    .from("employees")
+    .select("id,first_name,last_name")
+    .eq("active",true)
+    .order("first_name",{ascending:true})
+    .order("last_name",{ascending:true});
 
+  if(error){
+    console.error("Could not load employees:",error);
+    return;
+  }
+
+  employeeList = data || [];
+}
 function msg(t,c){const x=document.getElementById("ok");x.textContent=t;x.className="ok "+c;x.style.display="block"}
 function addCrew(){if(crewCount>=6){alert("Maximum of 6 crew members.");return}crewCount++;const r=document.createElement("div");r.className="crew";r.innerHTML='<div class="crewgrid"><input type="text" name="crew_'+crewCount+'_name" placeholder="Employee Name"><input type="number" name="crew_'+crewCount+'_regular" placeholder="Regular Hours" min="0" step="0.25"><input type="number" name="crew_'+crewCount+'_overtime" placeholder="OT Hours" min="0" step="0.25"></div>';document.getElementById("crew").appendChild(r)}
 window.addCrew=addCrew;
