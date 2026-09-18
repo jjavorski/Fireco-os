@@ -7,7 +7,7 @@
 header{background:#111;color:#fff;padding:26px 18px 24px;text-align:center}.brand,.tag,.title{font-family:Georgia,"Times New Roman",serif}.brand{font-size:27px;font-weight:700}.tag{font-size:11px;letter-spacing:1.5px;margin-top:5px}.title{font-size:15px;font-weight:700;margin-top:15px}
 .card{background:#fff;margin:14px;border-radius:14px;padding:16px;box-shadow:0 2px 10px #0001}h2{font-size:16px;margin:0 0 12px}label{display:block;font-size:12px;font-weight:700;margin:12px 0 6px}
 input,textarea{width:100%;font-size:16px;border:1px solid #ccc;border-radius:10px;padding:12px;background:#fff}textarea{min-height:105px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.crew{border:1px solid #ddd;border-radius:10px;padding:10px;margin:8px 0}.crewgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:7px}.crewgrid input{padding:10px}
+.crew{border:1px solid #ddd;border-radius:10px;padding:10px;margin:8px 0}.crewgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:7px}.crewgrid input,.crewgrid select{padding:10px}
 .status{border:1px solid #ddd;border-radius:10px;padding:12px;font-size:14px}.status input{width:auto;margin-right:7px}.photo{border:2px dashed #bbb;border-radius:12px;padding:18px;text-align:center}
 button{width:100%;border:0;border-radius:12px;padding:15px;font-size:17px;font-weight:800;cursor:pointer}button:disabled{opacity:.55}.primary{background:#111;color:#fff}.secondary{background:#e8e8e8;margin-top:9px}
 .ok{display:none;padding:12px;border-radius:10px;margin-top:10px;font-weight:700}.success{background:#e7f6e9}.error{background:#fbeaea}
@@ -69,8 +69,58 @@ async function loadEmployees(){
   employeeList = data || [];
 }
 function msg(t,c){const x=document.getElementById("ok");x.textContent=t;x.className="ok "+c;x.style.display="block"}
-function addCrew(){if(crewCount>=6){alert("Maximum of 6 crew members.");return}crewCount++;const r=document.createElement("div");r.className="crew";r.innerHTML='<div class="crewgrid"><input type="text" name="crew_'+crewCount+'_name" placeholder="Employee Name"><input type="number" name="crew_'+crewCount+'_regular" placeholder="Regular Hours" min="0" step="0.25"><input type="number" name="crew_'+crewCount+'_overtime" placeholder="OT Hours" min="0" step="0.25"></div>';document.getElementById("crew").appendChild(r)}
-window.addCrew=addCrew;
+function addCrew(){
+  if(crewCount>=6){
+    alert("Maximum of 6 crew members.");
+    return;
+  }
+
+  crewCount++;
+
+  const r=document.createElement("div");
+  r.className="crew";
+
+  const grid=document.createElement("div");
+  grid.className="crewgrid";
+
+  const employeeSelect=document.createElement("select");
+  employeeSelect.name="crew_"+crewCount+"_name";
+
+  const placeholder=document.createElement("option");
+  placeholder.value="";
+  placeholder.textContent="Select Employee";
+  employeeSelect.appendChild(placeholder);
+
+  employeeList.forEach(employee=>{
+    const option=document.createElement("option");
+    const fullName=((employee.first_name||"")+" "+(employee.last_name||"")).trim();
+    option.value=fullName;
+    option.textContent=fullName;
+    employeeSelect.appendChild(option);
+  });
+
+  const regular=document.createElement("input");
+  regular.type="number";
+  regular.name="crew_"+crewCount+"_regular";
+  regular.placeholder="Regular Hours";
+  regular.min="0";
+  regular.step="0.25";
+
+  const overtime=document.createElement("input");
+  overtime.type="number";
+  overtime.name="crew_"+crewCount+"_overtime";
+  overtime.placeholder="OT Hours";
+  overtime.min="0";
+  overtime.step="0.25";
+
+  grid.appendChild(employeeSelect);
+  grid.appendChild(regular);
+  grid.appendChild(overtime);
+  r.appendChild(grid);
+
+  document.getElementById("crew").appendChild(r);
+}
+  window.addCrew=addCrew;
 function clearSig(){const c=document.getElementById("sig");c.getContext("2d").clearRect(0,0,c.width,c.height)}window.clearSig=clearSig;
 function clearSig(){const c=document.getElementById("sig");c.getContext("2d").clearRect(0,0,c.width,c.height)}
 window.clearSig=clearSig;
@@ -261,7 +311,7 @@ document.getElementById("anotherWorkOrderButton").style.display = "block";
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
   const d = document.getElementById("date");
 
@@ -299,7 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       console.log("Supabase connected.");
-
+await loadEmployees();
     }else{
 
       console.warn("Supabase library unavailable.");
