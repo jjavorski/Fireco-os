@@ -501,6 +501,21 @@ const statusClass =
     <strong>Job For:</strong>
     ${escapeHtml(report.job_for_assigned_by || "—")}
   </div>
+  <div>
+  <strong>Crew:</strong>
+  ${
+    (report.crew || []).length
+      ? (report.crew || []).map(person =>
+          escapeHtml(person.employee_name || "—") +
+          " — " +
+          Number(person.regular_hours || 0) +
+          " Reg / " +
+          Number(person.overtime_hours || 0) +
+          " OT"
+        ).join("<br>")
+      : "—"
+  }
+</div>
           <div>
             <strong>Location:</strong>
             ${escapeHtml(report.locations || "—")}
