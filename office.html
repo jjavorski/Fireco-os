@@ -661,7 +661,15 @@ async function openReport(reportId){
     '">' +
 
       '<div style="float:right;display:flex;gap:8px;">' +
-
+'<button type="button" id="editReportViewer" style="' +
+  'border:0;' +
+  'background:#176b38;' +
+  'color:#fff;' +
+  'padding:8px 14px;' +
+  'border-radius:8px;' +
+  'cursor:pointer;' +
+  'font-weight:700;' +
+'">EDIT REPORT</button>' +
  '<button type="button" id="printReportViewer" style="' +
     'border:0;' +
     'background:#111;' +
@@ -898,6 +906,11 @@ if(showingArchived){
     "click",
     () => viewer.remove()
    );
+document
+  .getElementById("editReportViewer")
+  .addEventListener("click", () => {
+    alert("Edit Report feature is being set up.");
+  });
 }
 
 window.openReport = openReport;
