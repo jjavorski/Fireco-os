@@ -353,7 +353,292 @@ function formatSubmittedAt(value){
     minute:"2-digit"
   });
 }
-function renderReports(){
+function editField(label, id, value){
+  return (
+    '<label style="display:block;margin-top:14px;font-weight:700;">' +
+      escapeHtml(label) +
+    '</label>' +
+    '<input type="text" id="' + id + '" value="' +
+      escapeHtml(value ?? "") +
+    '" style="' +
+      'width:100%;' +
+      'padding:10px;' +
+      'margin-top:5px;' +
+      'border:1px solid #bbb;' +
+      'border-radius:6px;' +
+      'box-sizing:border-box;' +
+    '">'
+  );
+}
+  function openEditReport(report){
+
+  const oldViewer = document.getElementById("reportViewer");
+
+  if(oldViewer){
+    oldViewer.remove();
+  }
+
+  const editor = document.createElement("div");
+  editor.id = "reportEditor";
+
+  editor.style.cssText =
+    "position:fixed;" +
+    "inset:0;" +
+    "background:rgba(0,0,0,.65);" +
+    "z-index:9999;" +
+    "overflow:auto;" +
+    "padding:25px;";
+
+  editor.innerHTML =
+    '<div style="' +
+      'background:#fff;' +
+      'max-width:760px;' +
+      'margin:20px auto;' +
+      'padding:24px;' +
+      'border-radius:14px;' +
+    '">' +
+
+    '<h2>Edit Field Report</h2>' +
+editField("Report Date (YYYY-MM-DD)", "editDate", String(report.report_date || "").substring(0,10)) +
+    editField("Project", "editProject", report.project_name) +
+    editField("Work Order", "editWorkOrder", report.work_order_number) +
+    editField("Job For", "editJobFor", report.job_for_assigned_by) +
+editField("Location", "editLocation", report.locations) +
+editField("Work Accomplished", "editWork", report.work_accomplished) +
+editField("Materials", "editMaterials", report.materials_used) +
+'<label style="display:block;margin-top:14px;font-weight:700;">Completion Status</label>' +
+'<select id="editCompletionStatus" style="' +
+  'width:100%;' +
+  'padding:10px;' +
+  'margin-top:5px;' +
+  'border:1px solid #bbb;' +
+  'border-radius:6px;' +
+  'box-sizing:border-box;' +
+'">' +
+  '<option value="ready_to_invoice"' +
+    (report.completion_status === "ready_to_invoice" ? " selected" : "") +
+  '>Ready to Invoice</option>' +
+  '<option value="not_complete"' +
+    (report.completion_status === "not_complete" ? " selected" : "") +
+  '>Not Complete</option>' +
+'</select>' +
+    editField("Completion Notes", "editNotes", report.completion_notes) +
+editField("Tomorrow", "editTomorrow", report.tomorrow_plan) +
+   '<h3 style="margin-top:25px;">Crew & Hours</h3>' +
+
+(report.crew || []).map((person, index) => {
+
+  return (
+    '<div style="padding:12px;margin-top:10px;border:1px solid #ddd;border-radius:8px;">' +
+
+    editField(
+      "Employee Name",
+      "editCrewName_" + index,
+      person.employee_name
+    ) +
+
+    editField(
+      "Regular Hours",
+      "editCrewRegular_" + index,
+      person.regular_hours ?? 0
+    ) +
+
+    editField(
+      "Overtime Hours",
+      "editCrewOvertime_" + index,
+      person.overtime_hours ?? 0
+    ) +
+
+    '</div>'
+  );
+
+}).join("") +
+    '<div style="margin-top:20px;">' +
+     '<button type="button" id="saveEditReport" style="' +
+  'background:#176b38;' +
+  'color:#fff;' +
+  'border:0;' +
+  'padding:10px 18px;' +
+  'border-radius:8px;' +
+  'cursor:pointer;' +
+  'font-weight:700;' +
+  'margin-right:10px;' +
+'">SAVE CHANGES</button>' +
+    '<button type="button" id="cancelEditReport">CANCEL</button>' +
+    '</div>' +
+
+    '</div>';
+
+  document.body.appendChild(editor);
+
+  document
+    .getElementById("cancelEditReport")
+    .addEventListener("click", () => {
+      editor.remove();
+      openReport(report.id);
+    });
+document
+  .getElementById("saveEditReport")
+  .addEventListener("click", async () => {
+    const saveButton = document.getElementById("saveEditReport");
+
+    saveButton.disabled = true;
+    saveButton.textContent = "SAVING...";
+
+    try {
+      await saveEditedReport(report, editor);
+    } catch(error) {
+      console.error("Error saving or refreshing report:", error);
+      alert(
+        "An error occurred. Some changes may have saved. " +
+        "Please refresh the dashboard and check the report before trying again."
+      );
+    } finally {
+      saveButton.disabled = false;
+      saveButton.textContent = "SAVE CHANGES";
+    }
+  });
+}
+ async function saveEditedReport(report, editor){
+
+  const getValue = id =>
+    editor.querySelector("#" + id).value.trim();
+
+  const updatedReport = {
+    report_date: getValue("editDate"),
+    project_name: getValue("editProject"),
+   completion_status: getValue("editCompletionStatus"),
+    work_order_number: getValue("editWorkOrder"),
+    job_for_assigned_by: getValue("editJobFor"),
+    locations: getValue("editLocation"),
+    work_accomplished: getValue("editWork"),
+    materials_used: getValue("editMaterials"),
+    completion_notes: getValue("editNotes"),
+    tomorrow_plan: getValue("editTomorrow")
+  };
+const reportDate = updatedReport.report_date;
+
+const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(reportDate);
+
+if(!dateMatch){
+  alert("Please enter the report date as YYYY-MM-DD.");
+  return;
+}
+
+const year = Number(dateMatch[1]);
+const month = Number(dateMatch[2]);
+const day = Number(dateMatch[3]);
+
+const validDate = new Date(year, month - 1, day);
+
+if(
+  validDate.getFullYear() !== year ||
+  validDate.getMonth() !== month - 1 ||
+  validDate.getDate() !== day
+){
+  alert("Please enter a valid report date.");
+  return;
+}
+  const updatedCrew = [];
+
+for(let i = 0; i < (report.crew || []).length; i++){
+
+  const person = report.crew[i];
+
+  const name = getValue("editCrewName_" + i);
+  const regularText = getValue("editCrewRegular_" + i);
+  const overtimeText = getValue("editCrewOvertime_" + i);
+
+  const regular = Number(regularText);
+  const overtime = Number(overtimeText);
+
+  if(!name){
+    alert("Employee " + (i + 1) + " must have a name.");
+    return;
+  }
+
+  if(
+    regularText === "" ||
+    overtimeText === "" ||
+    !Number.isFinite(regular) ||
+    !Number.isFinite(overtime) ||
+    regular < 0 ||
+    overtime < 0
+  ){
+    alert("Please enter valid hours for " + name + ".");
+    return;
+  }
+
+  if(!person.id){
+    alert("Missing crew record ID for " + name + ". Changes were not saved.");
+    return;
+  }
+
+  updatedCrew.push({
+    id: person.id,
+    employee_name: name,
+    regular_hours: regular,
+    overtime_hours: overtime
+  });
+}
+   const { data: savedReport, error: reportError } = await db
+  .from("field_reports")
+  .update(updatedReport)
+  .eq("id", report.id)
+  .select("id");
+
+if(reportError){
+  alert("Report could not be saved: " + reportError.message);
+  return;
+}
+
+if(!savedReport || savedReport.length !== 1){
+  alert("Report update could not be confirmed.");
+  return;
+}
+
+console.log("Report details saved successfully.");
+for(const person of updatedCrew){
+
+  const { data: savedCrew, error: crewError } = await db
+    .from("field_report_crew")
+    .update({
+      employee_name: person.employee_name,
+      regular_hours: person.regular_hours,
+      overtime_hours: person.overtime_hours
+    })
+    .eq("id", person.id)
+    .eq("field_report_id", report.id)
+    .select("id");
+
+  if(crewError){
+    alert(
+  "Employee update failed: " + crewError.message +
+  "\nSome report changes may already have saved." +
+  "\nRefresh the dashboard and verify the report before trying again."
+);
+    return;
+  }
+
+  if(!savedCrew || savedCrew.length !== 1){
+  alert(
+    "An employee update could not be confirmed." +
+    "\nSome changes may already have saved." +
+    "\nRefresh the dashboard and verify the report."
+  );
+  return;
+}
+
+}
+
+console.log("Employee names and hours saved successfully.");
+await loadReports();
+
+editor.remove();
+
+alert("Report changes saved successfully!");
+ }
+  function renderReports(){
 
   const box = document.getElementById("reports");
   const search =
@@ -909,7 +1194,7 @@ if(showingArchived){
 document
   .getElementById("editReportViewer")
   .addEventListener("click", () => {
-    alert("Edit Report feature is being set up.");
+    openEditReport(report);
   });
 }
 
@@ -1028,6 +1313,7 @@ renderReports();
 
     document.getElementById("reports").innerHTML =
       '<div class="empty">Unable to load reports.</div>';
+ throw error;
   }
 }
 
