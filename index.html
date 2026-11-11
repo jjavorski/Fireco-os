@@ -85,7 +85,7 @@ function addCrew(){
 
   const employeeSelect=document.createElement("select");
   employeeSelect.name="crew_"+crewCount+"_name";
-
+employeeSelect.required=true;
   const placeholder=document.createElement("option");
   placeholder.value="";
   placeholder.textContent="Select Employee";
@@ -180,15 +180,18 @@ async function submitReport(e){
         }
 
         const f=new FormData(document.getElementById("report"));
-
-       const reportId = crypto.randomUUID();
+const submittingForeman = String(f.get("crew_1_name") || "").trim();
+       if(!submittingForeman){
+  throw new Error("Please select the first employee before submitting the report.");
+}
+      const reportId = crypto.randomUUID();
 
 const report={
     id: reportId,
     work_order_number:f.get("workOrder")||null,
     project_name:f.get("project")||null,
     report_date:f.get("date")||null,
-    foreman_name:null,
+    foreman_name:submittingForeman,
     job_for_assigned_by:f.get("jobFor")||null,
     locations:f.get("locations")||null,
     work_accomplished:f.get("work")||null,
